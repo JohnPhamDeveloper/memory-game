@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import './card.scss';
+import './Card.scss';
 
 const Card = ({ number }) => {
   return <div className="card">{number}</div>;
