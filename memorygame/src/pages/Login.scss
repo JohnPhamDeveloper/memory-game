@@ -14,15 +14,35 @@
   background-color: orange;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
   flex-direction: column;
   border-radius: 10%;
 
-  &__username-label {
+  & input[type='text'],
+  & input[type='password'] {
     color: white;
+    margin-left: 5px;
+
+    &:not(:first-child) {
+      margin-top: 10px;
+    }
+
+    &::placeholder {
+      color: rgba(255, 255, 255, 0.603);
+    }
   }
 
-  &__password-label {
+  & .login-button,
+  & .register-button {
     color: white;
+    width: 150px;
+  }
+
+  & .login-button {
+    margin-top: 30px;
+  }
+
+  & .register-button {
+    margin-top: 10px;
   }
 }
