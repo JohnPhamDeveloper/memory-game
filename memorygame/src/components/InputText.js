@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const InputText = ({ inputFor, value, onChange }) => {
+const InputText = ({ ref, inputFor, value, onChange }) => {
   const inputForToLower = inputFor.toLowerCase();
 
   return (
@@ -12,6 +12,7 @@ const InputText = ({ inputFor, value, onChange }) => {
       value={value}
       placeholder={inputFor}
       onChange={onChange}
+      ref={ref}
     />
   );
 };
@@ -20,12 +21,17 @@ InputText.propTypes = {
   inputFor: PropTypes.string,
   value: PropTypes.string,
   onChange: PropTypes.func,
+  ref: PropTypes.oneOfType([
+    PropTypes.func,
+    PropTypes.shape({ current: PropTypes.instanceOf(Element) }),
+  ]),
 };
 
 InputText.defaultProps = {
   inputFor: 'NULL',
-  value: 'NULL',
-  onChange: () => console.log('onChange null'),
+  value: '',
+  onChange: () => {},
+  ref: () => {},
 };
 
 export default InputText;

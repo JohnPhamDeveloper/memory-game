@@ -22,7 +22,7 @@ InputButton.propTypes = {
 
 InputButton.defaultProps = {
   inputFor: 'NULL',
-  onClick: () => console.error('onClick is undefined'),
+  onClick: () => {},
 };
 
 export default InputButton;

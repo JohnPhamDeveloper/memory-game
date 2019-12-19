@@ -1,24 +1,44 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Login from './pages/Login';
 import Cards from './components/Cards';
 import './app.scss';
 import './typography.scss';
+import InputText from './components/InputText';
+import InputButton from './components/InputButton';
 
-function App() {
-  // Have setting here for state for number of cards and error check
-  // The number of cards must be even or else there will not be a pair that matches
+const App = () => {
+  const [numberOfCardsField, setNumberOfCardsField] = useState('');
+  const [numberOfCardsSubmit, setNumberOfCardsSubmit] = useState(0);
+
+  const onCardNumberChange = e => setNumberOfCardsField(e.target.value);
+
+  const renderCards = () => {
+    if (numberOfCardsSubmit <= 1)
+      return <div className="card-number-error">Enter number of play cards greater than 2!</div>;
+
+    return <Cards numberOfCards={numberOfCardsSubmit} />;
+  };
+
+  const onConfirmCardsSubmit = () => {
+    setNumberOfCardsSubmit(numberOfCardsField);
+  };
+
   return (
     <div className="App">
       <Login />
-
-      {/* Play Area */}
-      {/* Right side will be the chat */}
       <div className="game-page">
-        <Cards numberOfCards={32} />
-        <div className="history"></div>
+        {renderCards()}
+        <div className="history">
+          <InputText
+            inputFor="Number of cards"
+            value={numberOfCardsField}
+            onChange={onCardNumberChange}
+          />
+          <InputButton inputFor="Confirm cards" onClick={onConfirmCardsSubmit} />
+        </div>
       </div>
     </div>
   );
-}
+};
 
 export default App;

@@ -9,6 +9,12 @@ const Cards = ({ numberOfCards }) => {
     generateCards();
   }, []);
 
+  useEffect(() => {
+    // Clear current cards if number of cards changes
+    clearCards();
+    generateCards();
+  }, [numberOfCards]);
+
   const generateCards = () => {
     const tempCards = [];
 
@@ -20,6 +26,8 @@ const Cards = ({ numberOfCards }) => {
 
     setCards(tempCards);
   };
+
+  const clearCards = () => setCards([]);
 
   const renderCards = () => {
     return cards.map(card => card);

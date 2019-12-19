@@ -4,4 +4,8 @@
   flex-direction: row;
   flex-wrap: wrap;
   padding: 40px;
+  align-items: center;
+
+  // Need to move to parent
+  align-self: baseline;
 }

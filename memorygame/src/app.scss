@@ -1,3 +1,10 @@
+.card-number-error {
+  color: red;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .game-page {
   display: grid;
   grid-template-columns: 1fr 200px;
