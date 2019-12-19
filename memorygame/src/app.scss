@@ -1,3 +1,17 @@
+.game-page {
+  display: grid;
+  grid-template-columns: 1fr 200px;
+  grid-template-rows: 100vh;
+
+  & .history {
+    background: pink;
+  }
+
+  & .play-area {
+    background: red;
+  }
+}
+
 input[type] {
   border: none;
   background-image: none;

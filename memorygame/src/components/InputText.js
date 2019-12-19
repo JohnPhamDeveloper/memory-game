@@ -6,7 +6,7 @@ const InputText = ({ inputFor, value, onChange }) => {
 
   return (
     <input
-      classinputFor={`${inputForToLower}-input`}
+      className={`${inputForToLower}-input`}
       type="text"
       name={`${inputForToLower}-input`}
       value={value}
