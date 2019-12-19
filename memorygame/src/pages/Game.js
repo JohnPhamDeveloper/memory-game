@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import './Game.scss';
 import Cards from '../components/Cards';
 import InputText from '../components/InputText';
 import InputButton from '../components/InputButton';

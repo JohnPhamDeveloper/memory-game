@@ -1,0 +1,24 @@
+.cards {
+  align-self: baseline;
+}
+
+.card-number-error {
+  color: red;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.game-page {
+  display: grid;
+  grid-template-columns: 1fr 200px;
+  grid-template-rows: 100vh;
+
+  & .history {
+    background: pink;
+  }
+
+  & .play-area {
+    background: red;
+  }
+}

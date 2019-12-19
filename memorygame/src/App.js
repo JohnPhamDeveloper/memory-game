@@ -1,7 +1,7 @@
 import React from 'react';
 import Login from './pages/Login';
 import Game from './pages/Game';
-import './app.scss';
+import './default.scss';
 import './typography.scss';
 
 const App = () => {
