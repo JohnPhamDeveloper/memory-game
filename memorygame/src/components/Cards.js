@@ -4,6 +4,7 @@ import './Cards.scss';
 
 const Cards = ({ numberOfCards }) => {
   const [cards, setCards] = useState([]);
+  const [selectedCardsIndex, setSelectedCardsIndex] = useState([]);
 
   useEffect(() => {
     // Generate cards on mount
@@ -24,8 +25,24 @@ const Cards = ({ numberOfCards }) => {
     const tempCards = [];
 
     for (let i = 1; i <= numberOfCards; i++) {
-      const component = <Card key={`card-${i}`} number={i} />;
-      const component2 = <Card key={`card-${i}-paired`} number={i} />;
+      const component = (
+        <Card
+          key={`card-${i} paired1`}
+          id={`card-${i} paired1`}
+          number={i}
+          index={i}
+          onClick={onCardClick}
+        />
+      );
+      const component2 = (
+        <Card
+          key={`card-${i} paired2`}
+          id={`card-${i} paired2`}
+          number={i}
+          index={i}
+          onClick={onCardClick}
+        />
+      );
       tempCards.push(component, component2); // Push twice so that there are two cards that can match
     }
 
@@ -35,6 +52,12 @@ const Cards = ({ numberOfCards }) => {
 
   const clearCards = () => setCards([]);
 
+  // Move to controller class?
+  const onCardClick = (index, number) => {
+    console.log('Index: ', index);
+    console.log('Number: ', number);
+  };
+
   const renderCards = () => {
     return cards.map(card => card);
   };
@@ -43,9 +66,18 @@ const Cards = ({ numberOfCards }) => {
   const shuffle = array => {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * i);
-      const temp = array[i];
-      array[i] = array[j];
-      array[j] = temp;
+
+      // Give the component a new index since shuffling changes position in array
+      const modifiedComponentI = (
+        <Card {...array[i].props} key={`${array[i].props.id} modified`} index={j} />
+      );
+      const modifiedComponentJ = (
+        <Card {...array[j].props} key={`${array[j].props.id} modified`} index={i} />
+      );
+
+      // Swap, but use the modified version instead
+      array[i] = modifiedComponentJ;
+      array[j] = modifiedComponentI;
     }
   };
 
