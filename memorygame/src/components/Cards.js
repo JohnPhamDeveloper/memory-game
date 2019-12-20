@@ -3,17 +3,17 @@ import Card from './Card';
 import './Cards.scss';
 
 const Cards = ({ numberOfCards }) => {
-  const [cards, setCards] = useState([]);
-  const [selectedCardsIndex, setSelectedCardsIndex] = useState([]);
+  const [cards, setCards] = useState([]); // Card components
+  const [blockMouse, setBlockMouse] = useState(false);
+  const [selectedCardsIndex, setSelectedCardsIndex] = useState([]); // Cards currently selected by player
 
   useEffect(() => {
-    // Generate cards on mount
     generateCards();
   }, []);
 
   useEffect(() => {
     // Clear the cards since user has chosen a different number of cards
-    clearCards();
+    setCards([]);
   }, [numberOfCards]);
 
   useEffect(() => {
@@ -29,18 +29,43 @@ const Cards = ({ numberOfCards }) => {
     if (selectedCardsIndex && selectedCardsIndex.length === 2) {
       console.log('Applying game logic...');
 
-      // TODO: make more readable
-      if (cards[selectedCardsIndex[0]].props.number === cards[selectedCardsIndex[1]].props.number) {
+      // Block input here...
+      setBlockMouse(true);
+
+      const cardNumber1 = cards[selectedCardsIndex[0]].props.number;
+      const cardNumber2 = cards[selectedCardsIndex[1]].props.number;
+
+      // Check if the two cards are the same number
+      if (cardNumber1 === cardNumber2) {
         console.log('Matched');
       } else {
-        console.log('Not matched');
+        // Not the same, so "flip" them back
+
+        // Wait 1 second so they can see the second card
+        // At the same time, block user input
+        setTimeout(() => {
+          // Then execute logic
+          console.log('Not matched');
+          const cardIndex1 = cards[selectedCardsIndex[0]].props.index;
+          const cardIndex2 = cards[selectedCardsIndex[1]].props.index;
+          const tempCards = cards.slice();
+          tempCards[cardIndex1] = (
+            <Card {...cards[cardIndex1].props} key={cards[cardIndex1].props.id} showCard={false} />
+          );
+          tempCards[cardIndex2] = (
+            <Card {...cards[cardIndex2].props} key={cards[cardIndex1].props.id} showCard={false} />
+          );
+          setCards(tempCards);
+          setBlockMouse(false);
+        }, 2000);
       }
 
-      // Clear, then unshow those two cards if they are not a match
+      // Clear selected cards
       setSelectedCardsIndex([]);
     }
   }, [selectedCardsIndex]);
 
+  // Generate card components to store into card state
   const generateCards = () => {
     const tempCards = [];
 
@@ -54,6 +79,8 @@ const Cards = ({ numberOfCards }) => {
           onClick={onCardClick}
         />
       );
+
+      // This is the duplicate card
       const component2 = (
         <Card
           key={`card-${i} paired2`}
@@ -63,14 +90,12 @@ const Cards = ({ numberOfCards }) => {
           onClick={onCardClick}
         />
       );
-      tempCards.push(component, component2); // Push twice so that there are two cards that can match
+      tempCards.push(component, component2);
     }
 
     shuffle(tempCards);
     setCards(tempCards);
   };
-
-  const clearCards = () => setCards([]);
 
   const onCardClick = (index, number) => {
     console.log('Index: ', index);
@@ -103,7 +128,14 @@ const Cards = ({ numberOfCards }) => {
     }
   };
 
-  return <div className="cards">{renderCards()}</div>;
+  return (
+    <div
+      className="cards"
+      style={blockMouse ? { pointerEvents: 'none' } : { pointerEvents: 'all' }}
+    >
+      {renderCards()}
+    </div>
+  );
 };
 
 export default Cards;
