@@ -6,7 +6,7 @@ const Cards = ({ numberOfCards }) => {
   const [cards, setCards] = useState([]); // Card components
   const [blockMouse, setBlockMouse] = useState(false);
   const [currentSelectedCards, setCurrentSelectedCards] = useState([]); // Cards currently selected by player
-  const [previouslySelectedCards, setPreviouslySelectedCards] = useState([]); // All cards that stay displayed
+  const [previouslySelectedCards, setPreviouslySelectedCards] = useState([]); // All cards that matched already
 
   // Use a ref to our cards because this will be used in an onClick function
   // If I don't use a ref, the state will be stale inside the onClick function
@@ -33,6 +33,27 @@ const Cards = ({ numberOfCards }) => {
     if (previouslySelectedCards.length === cards.length) {
       console.log('Game is over!');
     }
+
+    // Find the previously selected cards and modify their style so that their color is green
+    // and make them unclickable
+    const tempCards = cards.slice();
+    console.log(previouslySelectedCards);
+    for (let i = 0; i < previouslySelectedCards.length; i++) {
+      const cardComponent = tempCards[previouslySelectedCards[i]];
+      const updatedCardComponent = (
+        <Card
+          {...cardComponent.props}
+          key={cardComponent.props.id}
+          style={{ pointerEvents: 'none', backgroundColor: 'green' }}
+        />
+      );
+
+      tempCards[previouslySelectedCards[i]] = updatedCardComponent;
+    }
+
+    setCards(tempCards);
+
+    console.log('updated');
   }, [previouslySelectedCards]);
 
   useEffect(() => {
@@ -50,31 +71,31 @@ const Cards = ({ numberOfCards }) => {
       if (cardNumber1 === cardNumber2) {
         console.log('Matched');
         setCurrentSelectedCards([]);
-        setPreviouslySelectedCards(cardIndex1, cardIndex2);
-        // setBlockMouse(false);
+        setPreviouslySelectedCards(oldArray => [...oldArray, cardIndex1, cardIndex2]);
+        setBlockMouse(false);
       } else {
         // Bad match, so "flip" them back
         // Wait 2 second so they can see the second card
         // At the same time, block user input
+        console.log('Not matched');
         if (timeoutRef.current !== null) clearTimeout(timeoutRef.current);
 
-        timeoutRef.current = null;
+        timeoutRef.current = setTimeout(() => {
+          timeoutRef.current = null;
 
-        // Then execute logic
-        console.log('Not matched');
+          const tempCards = cards.slice();
 
-        const tempCards = cards.slice();
+          tempCards[cardIndex1] = (
+            <Card {...cards[cardIndex1].props} key={cards[cardIndex1].props.id} showCard={false} />
+          );
 
-        tempCards[cardIndex1] = (
-          <Card {...cards[cardIndex1].props} key={cards[cardIndex1].props.id} showCard={false} />
-        );
+          tempCards[cardIndex2] = (
+            <Card {...cards[cardIndex2].props} key={cards[cardIndex2].props.id} showCard={false} />
+          );
 
-        tempCards[cardIndex2] = (
-          <Card {...cards[cardIndex2].props} key={cards[cardIndex2].props.id} showCard={false} />
-        );
-
-        setCards(tempCards);
-        setBlockMouse(false);
+          setCards(tempCards);
+          setBlockMouse(false);
+        }, 2000);
       }
 
       setCurrentSelectedCards([]);
