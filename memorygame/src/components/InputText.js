@@ -3,12 +3,15 @@ import PropTypes from 'prop-types';
 
 const InputText = ({ ref, inputFor, value, onChange }) => {
   const inputForToLower = inputFor.toLowerCase();
+  const classNameSplit = inputFor.split(' ');
+  const classNameJoin = classNameSplit.join('');
+  console.log(classNameJoin);
 
   return (
     <input
-      className={`${inputForToLower}-input`}
+      className={`${classNameJoin}-input`}
       type="text"
-      name={`${inputForToLower}-input`}
+      name={`${classNameJoin}-input`}
       value={value}
       placeholder={inputFor}
       onChange={onChange}
@@ -19,7 +22,7 @@ const InputText = ({ ref, inputFor, value, onChange }) => {
 
 InputText.propTypes = {
   inputFor: PropTypes.string,
-  value: PropTypes.string,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   onChange: PropTypes.func,
   ref: PropTypes.oneOfType([
     PropTypes.func,

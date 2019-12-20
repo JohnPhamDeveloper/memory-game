@@ -11,12 +11,14 @@
 .login-form {
   width: 500px;
   height: 500px;
-  background-color: orange;
+  background: #272958;
+  border-radius: 30px;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  border-radius: 10%;
+  color: #858dd7;
+  font-size: 12px;
 
   & input[type='text'],
   & input[type='password'] {
@@ -34,12 +36,11 @@
 
   & .login-button,
   & .register-button {
-    color: white;
     width: 150px;
   }
 
   & .login-button {
-    margin-top: 30px;
+    margin-top: 10px;
   }
 
   & .register-button {

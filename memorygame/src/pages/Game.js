@@ -7,8 +7,11 @@ import InputButton from '../components/InputButton';
 const Game = () => {
   const [numberOfCardsField, setNumberOfCardsField] = useState('');
   const [numberOfCardsSubmit, setNumberOfCardsSubmit] = useState(0);
+  const [mismatchDelayField, setMismatchDelayField] = useState('');
+  const [mismatchDelaySubmit, setMismatchDelaySubmit] = useState(2000);
 
   const onCardNumberChange = e => setNumberOfCardsField(e.target.value);
+  const onDelayChange = e => setMismatchDelayField(e.target.value);
 
   const renderCards = () => {
     if (numberOfCardsSubmit <= 1)
@@ -21,16 +24,31 @@ const Game = () => {
     setNumberOfCardsSubmit(numberOfCardsField);
   };
 
+  const onDelaySubmit = () => {
+    setMismatchDelaySubmit(mismatchDelayField);
+  };
+  // TODO: pass delay change into Cards
   return (
     <div className="game-page">
       {renderCards()}
       <div className="history">
-        <InputText
-          inputFor="Number of cards"
-          value={numberOfCardsField}
-          onChange={onCardNumberChange}
-        />
-        <InputButton inputFor="Confirm cards" onClick={onConfirmCardsSubmit} />
+        <div className="number-of-cards-field">
+          <InputText
+            inputFor="Number Of Cards"
+            value={numberOfCardsField}
+            onChange={onCardNumberChange}
+          />
+          <InputButton inputFor="Confirm Cards" onClick={onConfirmCardsSubmit} />
+        </div>
+
+        <div className="mismatch-delay-field">
+          <InputText
+            inputFor="Mismatch Delay"
+            value={mismatchDelayField}
+            onChange={onDelayChange}
+          />
+          <InputButton inputFor="Set Mismatch Delay" onClick={onDelaySubmit} />
+        </div>
       </div>
     </div>
   );

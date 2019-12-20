@@ -14,11 +14,36 @@
   grid-template-columns: 1fr 200px;
   grid-template-rows: 100vh;
 
+  background: rgb(97, 106, 201);
+  background: radial-gradient(circle, rgba(97, 106, 201, 1) 0%, rgba(74, 83, 179, 1) 71%);
+
   & .history {
-    background: pink;
+    background: #272958;
+    border-radius: 30px;
   }
 
   & .play-area {
-    background: red;
+    //background: red;
+  }
+}
+
+.history {
+  height: 70vh;
+  align-self: center;
+
+  & > div {
+    margin-top: 50px;
+    padding: 30px;
+  }
+
+  & .number-of-cards-field,
+  .mismatch-delay-field {
+    display: flex;
+    flex-direction: column;
+  }
+
+  & .MismatchDelay-input,
+  .SetMismatchDelay-input {
+    width: 100px;
   }
 }
