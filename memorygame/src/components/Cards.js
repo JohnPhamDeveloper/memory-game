@@ -3,7 +3,7 @@ import { generatePlayingCards, shuffleCards } from './Cards.controller';
 import Card from './Card';
 import './Cards.scss';
 
-const Cards = ({ numberOfCards }) => {
+const Cards = ({ numberOfCards, mismatchDelay }) => {
   const [cards, setCards] = useState([]); // Card components
   const [blockMouse, setBlockMouse] = useState(false);
   const [currentSelectedCards, setCurrentSelectedCards] = useState([]); // Cards currently selected by player
@@ -98,7 +98,7 @@ const Cards = ({ numberOfCards }) => {
 
           setCards(tempCards);
           setBlockMouse(false);
-        }, 2000);
+        }, mismatchDelay);
       }
 
       setCurrentSelectedCards([]);
