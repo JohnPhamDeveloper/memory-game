@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { generatePlayingCards, shuffleCards } from './Cards.controller';
 import Card from './Card';
 import './Cards.scss';
 
@@ -25,6 +26,8 @@ const Cards = ({ numberOfCards }) => {
   useEffect(() => {
     // Re-generate cards since cards were cleared
     if (cards && cards.length <= 0) generateCards();
+
+    // Used in onClick function to prevent stale state
     cardsRef.current = cards;
   }, [cards]);
 
@@ -104,33 +107,9 @@ const Cards = ({ numberOfCards }) => {
 
   // Generate card components to store into card state
   const generateCards = () => {
-    const tempCards = [];
-
-    for (let i = 1; i <= numberOfCards; i++) {
-      const component = (
-        <Card
-          key={`card-${i} paired1`}
-          id={`card-${i} paired1`}
-          number={i}
-          index={i}
-          onClick={onCardClick}
-        />
-      );
-
-      // This is the duplicate card
-      const component2 = (
-        <Card
-          key={`card-${i} paired2`}
-          id={`card-${i} paired2`}
-          number={i}
-          index={i}
-          onClick={onCardClick}
-        />
-      );
-      tempCards.push(component, component2);
-    }
-
-    shuffle(tempCards);
+    generatePlayingCards();
+    const tempCards = generatePlayingCards(numberOfCards, onCardClick);
+    shuffleCards(tempCards);
     setCards(tempCards);
   };
 
@@ -152,27 +131,6 @@ const Cards = ({ numberOfCards }) => {
 
   const renderCards = () => {
     return cards.map(card => card);
-  };
-
-  // https://medium.com/@nitinpatel_20236/how-to-shuffle-correctly-shuffle-an-array-in-javascript-15ea3f84bfb
-  const shuffle = array => {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * i);
-
-      // Give the component a new index since shuffling changes position in array
-      // Also use id to modify the key because key is not directly accessible as a prop
-      const modifiedComponentI = (
-        <Card {...array[i].props} key={`${array[i].props.id} modified`} index={j} />
-      );
-
-      const modifiedComponentJ = (
-        <Card {...array[j].props} key={`${array[j].props.id} modified`} index={i} />
-      );
-
-      // Swap, but use the modified version instead
-      array[i] = modifiedComponentJ;
-      array[j] = modifiedComponentI;
-    }
   };
 
   return (
