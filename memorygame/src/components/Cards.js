@@ -38,6 +38,7 @@ const Cards = ({ numberOfCards }) => {
       // Check if the two cards are the same number
       if (cardNumber1 === cardNumber2) {
         console.log('Matched');
+        setBlockMouse(false);
       } else {
         // Not the same, so "flip" them back
 
@@ -53,15 +54,14 @@ const Cards = ({ numberOfCards }) => {
             <Card {...cards[cardIndex1].props} key={cards[cardIndex1].props.id} showCard={false} />
           );
           tempCards[cardIndex2] = (
-            <Card {...cards[cardIndex2].props} key={cards[cardIndex1].props.id} showCard={false} />
+            <Card {...cards[cardIndex2].props} key={cards[cardIndex2].props.id} showCard={false} />
           );
           setCards(tempCards);
           setBlockMouse(false);
         }, 2000);
       }
 
-      // Clear selected cards
-      setSelectedCardsIndex([]);
+      // setSelectedCardsIndex([]);
     }
   }, [selectedCardsIndex]);
 
