@@ -7,32 +7,22 @@ import Card from './Card';
  * @param onCardClick {function} callback
  * @return [Card] Array of generated card components
  */
-export const generatePlayingCards = (numberOfCards, onCardClick) => {
+export const generatePlayingCards = (cardSocketDatas, onCardClick) => {
   const tempCards = [];
+  console.log(cardSocketDatas.length);
 
-  for (let i = 1; i <= numberOfCards; i++) {
+  for (let i = 0; i < cardSocketDatas.length; i++) {
+    console.log(cardSocketDatas[i]);
     const component = (
       <Card
-        key={`card-${i} paired1`}
-        id={`card-${i} paired1`}
-        number={i}
+        key={`card-${i}`}
+        id={`card-${i}`}
+        number={cardSocketDatas[i].number}
         index={i}
         onClick={onCardClick}
       />
     );
-
-    // This is the duplicate card
-    const component2 = (
-      <Card
-        key={`card-${i} paired2`}
-        id={`card-${i} paired2`}
-        number={i}
-        index={i}
-        onClick={onCardClick}
-      />
-    );
-
-    tempCards.push(component, component2);
+    tempCards.push(component);
   }
 
   return tempCards;

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Redirect } from 'react-router-dom';
 import socketIOClient from 'socket.io-client';
 import './Game.scss';
 import Cards from '../components/Cards';
@@ -16,12 +17,37 @@ const Game = ({ username }) => {
   const [mismatchDelaySubmit, setMismatchDelaySubmit] = useState(2000);
   const [mismatchDelaySubmitSocket, setMismatchDelaySubmitSocket] = useState(2000);
 
+  const [gameState, setGameState] = useState({});
+  const [cardSocketDatas, setCardSocketDatas] = useState([]);
+
+  // Check if it is the current turn of THIS player
+  // 1) server will emit the username of whoevers turn it is currently
+  // 2) If the emitted name is not THIS player, then block input for everything...
+  // 3) Next players turn when two cards have been selected...
+
   useEffect(() => {
-    socket.on('position', data => console.log(data));
-    socket.on('playerJoin', data => console.log(data));
+    socket.emit('playersUpdate', username);
+    // socket.on('position', data => console.log(data));
+    // socket.on('playerJoin', data => console.log(data));
+    socket.on('gameState', data => {
+      console.log('my data');
+      console.log(data);
+      setGameState(data);
+    });
     socket.on('mismatchDelayUpdate', data => setMismatchDelaySubmit(data));
-    socket.on('cardUpdate', data => setNumberOfCardsSubmit(data));
+    socket.on('cardUpdate', data => {
+      console.log('renreder');
+      setCardSocketDatas(data);
+    });
   }, []);
+
+  useEffect(() => {
+    console.log(cardSocketDatas);
+  }, [cardSocketDatas]);
+
+  // useEffect(() => {
+  //   console.log(gameState);
+  // }, [gameState]);
 
   // useEffect(() => {
   //   socket.emit('cardUpdate', numberOfCardsField);
@@ -35,10 +61,21 @@ const Game = ({ username }) => {
   const onDelayChange = e => setMismatchDelayField(e.target.value);
 
   const renderCards = () => {
-    if (numberOfCardsSubmit <= 1)
-      return <div className="card-number-error">Enter number of play cards greater than 2!</div>;
+    if (cardSocketDatas.length <= 1)
+      return <div className="card-number-error">Enter number of playing cards!</div>;
+    return (
+      <Cards
+        mismatchDelay={mismatchDelaySubmit}
+        cardSocketDatas={cardSocketDatas}
+        emitTurnFinished={emitTurnFinished}
+      />
+    );
+  };
 
-    return <Cards numberOfCards={numberOfCardsSubmit} mismatchDelay={mismatchDelaySubmit} />;
+  const emitTurnFinished = () => {
+    console.log('trying to emit socket');
+    console.log(socket)
+    socket.emit('turnFinished', username);
   };
 
   const onConfirmCardsSubmit = () => {
@@ -54,7 +91,14 @@ const Game = ({ username }) => {
 
   // TODO: pass delay change into Cards
   return (
-    <div className="game-page">
+    <div
+      className="game-page"
+      style={
+        gameState.currentPlayerTurnName === username
+          ? { pointerEvents: 'all' }
+          : { pointerEvents: 'none' }
+      }
+    >
       {renderCards()}
       <div className="history">
         {/* User info */}

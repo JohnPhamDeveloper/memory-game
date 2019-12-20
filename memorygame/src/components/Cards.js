@@ -3,11 +3,12 @@ import { generatePlayingCards, shuffleCards } from './Cards.controller';
 import Card from './Card';
 import './Cards.scss';
 
-const Cards = ({ numberOfCards, mismatchDelay }) => {
+const Cards = ({ mismatchDelay, cardSocketDatas, emitTurnFinished }) => {
   const [cards, setCards] = useState([]); // Card components
   const [blockMouse, setBlockMouse] = useState(false);
   const [currentSelectedCards, setCurrentSelectedCards] = useState([]); // Cards currently selected by player
   const [previouslySelectedCards, setPreviouslySelectedCards] = useState([]); // All cards that matched already
+  const [cardsJustGenerated, setCardsJustGenerated] = useState(true);
 
   // Use a ref to our cards because this will be used in an onClick function
   // If I don't use a ref, the state will be stale inside the onClick function
@@ -15,32 +16,44 @@ const Cards = ({ numberOfCards, mismatchDelay }) => {
   const timeoutRef = useRef(null); // When wrong cards are selected, show them for a bit before flipping
 
   useEffect(() => {
-    generateCards();
-  }, []);
+    console.log('UPDATEDDD');
+    console.log(cardSocketDatas);
+    if (cardSocketDatas) {
+      console.log('generate');
+      generateCards();
+    }
+  }, [cardSocketDatas]);
 
   useEffect(() => {
-    // Clear the cards since user has chosen a different number of cards
-    setCards([]);
-  }, [numberOfCards]);
-
-  useEffect(() => {
-    // Re-generate cards since cards were cleared
-    if (cards && cards.length <= 0) generateCards();
-
-    // Used in onClick function to prevent stale state
+    console.log('updated cards show');
+    console.log(cards);
     cardsRef.current = cards;
   }, [cards]);
 
+  // useEffect(() => {
+  //   // Re-generate cards since cards were cleared
+  //   if (cards && cards.length <= 0) generateCards();
+
+  //   // Used in onClick function to prevent stale state
+  //   cardsRef.current = cards;
+  // }, [cards]);
+
   useEffect(() => {
     // Game is over when all cards are selected
-    if (previouslySelectedCards.length === cards.length) {
+    if (previouslySelectedCards.length === cards.length && !cardsJustGenerated) {
       console.log('Game is over!');
+    }
+
+    //
+    if (!previouslySelectedCards || previouslySelectedCards.length <= 0) {
+      console.log('HALTED');
+      return;
     }
 
     // Find the previously selected cards and modify their style so that their color is green
     // and make them unclickable
     const tempCards = cards.slice();
-    console.log(previouslySelectedCards);
+
     for (let i = 0; i < previouslySelectedCards.length; i++) {
       const cardComponent = tempCards[previouslySelectedCards[i]];
       const updatedCardComponent = (
@@ -76,6 +89,7 @@ const Cards = ({ numberOfCards, mismatchDelay }) => {
         setCurrentSelectedCards([]);
         setPreviouslySelectedCards(oldArray => [...oldArray, cardIndex1, cardIndex2]);
         setBlockMouse(false);
+        emitTurnFinished();
       } else {
         // Bad match, so "flip" them back
         // Wait 2 second so they can see the second card
@@ -98,6 +112,7 @@ const Cards = ({ numberOfCards, mismatchDelay }) => {
 
           setCards(tempCards);
           setBlockMouse(false);
+          emitTurnFinished();
         }, mismatchDelay);
       }
 
@@ -107,15 +122,17 @@ const Cards = ({ numberOfCards, mismatchDelay }) => {
 
   // Generate card components to store into card state
   const generateCards = () => {
-    generatePlayingCards();
-    const tempCards = generatePlayingCards(numberOfCards, onCardClick);
-    shuffleCards(tempCards);
+    console.log('generating cards');
+    console.log(cardSocketDatas);
+    const tempCards = generatePlayingCards(cardSocketDatas, onCardClick);
+    console.log(tempCards);
     setCards(tempCards);
   };
 
   const onCardClick = (index, number) => {
     console.log('Index: ', index);
     console.log('Number: ', number);
+    // move to server
     setCurrentSelectedCards(oldArray => [...oldArray, index]);
 
     console.log(cardsRef.current);

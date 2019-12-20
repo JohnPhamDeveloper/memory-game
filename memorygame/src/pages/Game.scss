@@ -20,10 +20,11 @@
   background: radial-gradient(circle, rgba(97, 106, 201, 1) 0%, rgba(74, 83, 179, 1) 71%);
 
   & div {
-    color: #858dd7;
+    //color: #858dd7;
   }
 
   & .history {
+    color: #858dd7;
     background: #272958;
     border-radius: 30px;
     position: fixed;
