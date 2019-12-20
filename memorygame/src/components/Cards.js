@@ -6,14 +6,19 @@ const Cards = ({ numberOfCards }) => {
   const [cards, setCards] = useState([]);
 
   useEffect(() => {
+    // Generate cards on mount
     generateCards();
   }, []);
 
   useEffect(() => {
-    // Clear current cards if number of cards changes
+    // Clear the cards since user has chosen a different number of cards
     clearCards();
-    generateCards();
   }, [numberOfCards]);
+
+  useEffect(() => {
+    // Re-genderate cards since cards were cleared
+    if (cards && cards.length <= 0) generateCards();
+  }, [cards]);
 
   const generateCards = () => {
     const tempCards = [];
@@ -25,7 +30,6 @@ const Cards = ({ numberOfCards }) => {
     }
 
     shuffle(tempCards);
-
     setCards(tempCards);
   };
 
