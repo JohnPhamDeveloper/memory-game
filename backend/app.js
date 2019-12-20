@@ -32,14 +32,16 @@ socketio.on('connection', socket => {
     console.log(playerDatas);
 
     // Start game with two players
-    // if (playerDatas.length >= 2 && !gameStarted) {
-    gameStarted = true;
-    currentPlayerTurnName = playerDatas[0]; // This players turn
+    if (playerDatas.length >= 2 && !gameStarted) {
+      gameStarted = true;
+      currentPlayerTurnName = playerDatas[0]; // This players turn
 
-    socketio.emit('gameState', {
-      started: gameStarted,
-      currentPlayerTurnName: playerDatas[currentPlayerTurnIndex],
-    });
+      socketio.emit('gameState', {
+        started: gameStarted,
+        currentPlayerTurnName: playerDatas[currentPlayerTurnIndex],
+        players: playerDatas,
+      });
+    }
   });
 
   socket.on('turnFinished', data => {
@@ -49,6 +51,7 @@ socketio.on('connection', socket => {
     socketio.emit('gameState', {
       stated: gameStarted,
       currentPlayerTurnName: playerDatas[currentPlayerTurnIndex],
+      players: playerDatas,
     });
   });
 
@@ -61,8 +64,6 @@ socketio.on('connection', socket => {
 http.listen(4000, () => {
   console.log('Listening on port 4000');
 });
-
-// 1) Generate cards up to the number of card counts * 2
 
 const shuffle = cardsData => {
   for (let i = cardsData.length - 1; i > 0; i--) {

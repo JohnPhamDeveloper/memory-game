@@ -17,6 +17,8 @@ const Game = ({ username }) => {
   const [mismatchDelaySubmit, setMismatchDelaySubmit] = useState(2000);
   const [mismatchDelaySubmitSocket, setMismatchDelaySubmitSocket] = useState(2000);
 
+  const [otherPlayerName, setOtherPlayerName] = useState('');
+
   const [gameState, setGameState] = useState({});
   const [cardSocketDatas, setCardSocketDatas] = useState([]);
 
@@ -33,6 +35,8 @@ const Game = ({ username }) => {
       console.log('my data');
       console.log(data);
       setGameState(data);
+      const otherPlayer = data.players.filter(name => name !== username);
+      setOtherPlayerName(otherPlayer);
     });
     socket.on('mismatchDelayUpdate', data => setMismatchDelaySubmit(data));
     socket.on('cardUpdate', data => {
@@ -44,6 +48,8 @@ const Game = ({ username }) => {
   useEffect(() => {
     console.log(cardSocketDatas);
   }, [cardSocketDatas]);
+
+  // When turn changes to this playrs turn, render the border box...
 
   // useEffect(() => {
   //   console.log(gameState);
@@ -74,7 +80,7 @@ const Game = ({ username }) => {
 
   const emitTurnFinished = () => {
     console.log('trying to emit socket');
-    console.log(socket)
+    console.log(socket);
     socket.emit('turnFinished', username);
   };
 
@@ -102,7 +108,11 @@ const Game = ({ username }) => {
       {renderCards()}
       <div className="history">
         {/* User info */}
-        <div className="user-info user-info--1">
+        <div
+          className={`user-info user-info--1 ${
+            gameState.currentPlayerTurnName === username ? 'user-info--active' : ''
+          }`}
+        >
           {/* Profile Icon */}
           <svg
             aria-hidden="true"
@@ -122,7 +132,11 @@ const Game = ({ username }) => {
           <h2>{username}</h2>
         </div>
 
-        <div className="user-info user-info--2">
+        <div
+          className={`user-info user-info--2 ${
+            gameState.currentPlayerTurnName !== username ? 'user-info--active' : ''
+          }`}
+        >
           {/* Profile Icon */}
           <svg
             aria-hidden="true"
@@ -139,7 +153,7 @@ const Game = ({ username }) => {
               d="M224 256c70.7 0 128-57.3 128-128S294.7 0 224 0 96 57.3 96 128s57.3 128 128 128zm89.6 32h-16.7c-22.2 10.2-46.9 16-72.9 16s-50.6-5.8-72.9-16h-16.7C60.2 288 0 348.2 0 422.4V464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48v-41.6c0-74.2-60.2-134.4-134.4-134.4z"
             ></path>
           </svg>
-          <h2>Joey</h2>
+          <h2>{otherPlayerName}</h2>
         </div>
 
         {/* Number of cards */}
