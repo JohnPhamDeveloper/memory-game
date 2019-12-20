@@ -13,6 +13,7 @@
   display: grid;
   grid-template-columns: 1fr 200px;
   grid-template-rows: 100vh;
+  overflow: scroll;
 
   background: rgb(97, 106, 201);
   background: radial-gradient(circle, rgba(97, 106, 201, 1) 0%, rgba(74, 83, 179, 1) 71%);
@@ -20,6 +21,9 @@
   & .history {
     background: #272958;
     border-radius: 30px;
+    position: fixed;
+    right: 0%;
+    top: 25%;
   }
 
   & .play-area {
