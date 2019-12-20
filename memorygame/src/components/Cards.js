@@ -21,6 +21,26 @@ const Cards = ({ numberOfCards }) => {
     if (cards && cards.length <= 0) generateCards();
   }, [cards]);
 
+  /**
+   * TODO HERE
+   */
+  useEffect(() => {
+    // Player has selected two cards
+    if (selectedCardsIndex && selectedCardsIndex.length === 2) {
+      console.log('Applying game logic...');
+
+      // TODO: make more readable
+      if (cards[selectedCardsIndex[0]].props.number === cards[selectedCardsIndex[1]].props.number) {
+        console.log('Matched');
+      } else {
+        console.log('Not matched');
+      }
+
+      // Clear, then unshow those two cards if they are not a match
+      setSelectedCardsIndex([]);
+    }
+  }, [selectedCardsIndex]);
+
   const generateCards = () => {
     const tempCards = [];
 
@@ -52,10 +72,10 @@ const Cards = ({ numberOfCards }) => {
 
   const clearCards = () => setCards([]);
 
-  // Move to controller class?
   const onCardClick = (index, number) => {
     console.log('Index: ', index);
     console.log('Number: ', number);
+    setSelectedCardsIndex(oldArray => [...oldArray, index]);
   };
 
   const renderCards = () => {
@@ -68,9 +88,11 @@ const Cards = ({ numberOfCards }) => {
       const j = Math.floor(Math.random() * i);
 
       // Give the component a new index since shuffling changes position in array
+      // Also use id to modify the key because key is not directly accessible as a prop
       const modifiedComponentI = (
         <Card {...array[i].props} key={`${array[i].props.id} modified`} index={j} />
       );
+
       const modifiedComponentJ = (
         <Card {...array[j].props} key={`${array[j].props.id} modified`} index={i} />
       );
