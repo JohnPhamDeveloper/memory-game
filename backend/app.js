@@ -21,7 +21,11 @@ const matchPointIncrement = 100;
  * CLIENT CONNECTION *
  * * * * * * * * * * * */
 socketio.on('connection', socket => {
+  /**
+   * CARD NUMBER SUBMISSION
+   */
   socket.on('cardUpdate', data => {
+    reset();
     console.log('Updating cards: ', data);
     numberOfCards = data;
 
@@ -117,25 +121,7 @@ socketio.on('connection', socket => {
    * RESET GAME *
    * * * * * * */
   socket.on('reset', data => {
-    if (data === true) {
-      numberOfCards = 0;
-      cardsData = [];
-      matchedCardIndexes = [];
-      currentPlayerTurnIndex = 0;
-      // score = [0, 0];
-    }
-
-    // Send new game state back for reset
-    socketio.emit('gameState', {
-      started: true,
-      playerDataObjects,
-      currentPlayerTurnIndex,
-      currentPlayerTurnInformation: playerDataObjects[currentPlayerTurnName],
-      currentPlayerTurnName: playerDatas[currentPlayerTurnIndex],
-      players: playerDatas,
-      status: 'Game Resetted',
-      // score,
-    });
+    reset();
   });
 
   /* * * * * * * * *
@@ -213,4 +199,22 @@ const generatePlayingCards = () => {
   }
 
   return tempCards;
+};
+
+const reset = () => {
+  numberOfCards = 0;
+  cardsData = [];
+  matchedCardIndexes = [];
+  //currentPlayerTurnIndex = 0;
+
+  // Send new game state back for reset
+  socketio.emit('gameState', {
+    started: true,
+    playerDataObjects,
+    currentPlayerTurnIndex,
+    currentPlayerTurnInformation: playerDataObjects[currentPlayerTurnName],
+    currentPlayerTurnName: playerDatas[currentPlayerTurnIndex],
+    players: playerDatas,
+    status: 'Game Resetted',
+  });
 };

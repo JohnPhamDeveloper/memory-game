@@ -71,13 +71,7 @@ const Game = ({ username }) => {
     );
   };
 
-  const onResetGameSubmit = () => {
-    // 1) Must reset both players score in server
-    socket.emit('reset', true);
-
-    // 2) Reset local variables
-  };
-
+  const onResetGameSubmit = () => socket.emit('reset', true);
   const onFinishScreenClose = () => setShowFinishScreen(false);
   const onCardNumberChange = e => setNumberOfCardsField(e.target.value);
   const onDelayChange = e => setMismatchDelayField(e.target.value);
