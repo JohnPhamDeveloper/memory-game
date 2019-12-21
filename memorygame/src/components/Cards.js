@@ -10,6 +10,7 @@ const Cards = ({
   emitCardClicked,
   socket,
   isCurrentTurn,
+  status,
 }) => {
   const [cards, setCards] = useState([]); // Card components
   const [blockMouse, setBlockMouse] = useState(false);
@@ -23,17 +24,28 @@ const Cards = ({
   const timeoutRef = useRef(null); // When wrong cards are selected, show them for a bit before flipping
 
   useEffect(() => {
-    console.log('UPDATEDDD');
-    console.log(cardSocketDatas);
-    if (cardSocketDatas) {
-      console.log('generate');
-      generateCards();
-    }
     socket.on('cardClicked', data => {
       // Set the card to be clicked
       console.log('ths card was clicked', data);
       showCardInDeck(data);
     });
+  }, []);
+
+  useEffect(() => {
+    if (status === 'Game Resetted') {
+      setCardsJustGenerated(true);
+      setCurrentSelectedCards([]);
+      setPreviouslySelectedCards([]);
+      setCards([]);
+    }
+  }, [status]);
+
+  useEffect(() => {
+    console.log('UPDATEDDD');
+    console.log(cardSocketDatas);
+    if (cardSocketDatas) {
+      generateCards();
+    }
   }, [cardSocketDatas]);
 
   const showCardInDeck = index => {

@@ -2,35 +2,22 @@ import React, { useState, useEffect } from 'react';
 import socketIOClient from 'socket.io-client';
 import './Game.scss';
 import Cards from '../components/Cards';
-import InputText from '../components/InputText';
-import InputButton from '../components/InputButton';
+//import InputText from '../components/InputText';
+//import InputButton from '../components/InputButton';
 import User from '../components/User';
 
 const socket = socketIOClient('http://localhost:4000');
 
 const Game = ({ username }) => {
   const [numberOfCardsField, setNumberOfCardsField] = useState('');
-  const [numberOfCardsSubmit, setNumberOfCardsSubmit] = useState(0);
-  const [numberOfCardsSubmitSocket, setNumberOfCardsSubmitSocket] = useState(0);
-
   const [mismatchDelayField, setMismatchDelayField] = useState('');
   const [mismatchDelaySubmit, setMismatchDelaySubmit] = useState(2000);
-  const [mismatchDelaySubmitSocket, setMismatchDelaySubmitSocket] = useState(2000);
-
   const [otherPlayerName, setOtherPlayerName] = useState('');
-
   const [gameState, setGameState] = useState({});
   const [cardSocketDatas, setCardSocketDatas] = useState([]);
 
-  // Check if it is the current turn of THIS player
-  // 1) server will emit the username of whoevers turn it is currently
-  // 2) If the emitted name is not THIS player, then block input for everything...
-  // 3) Next players turn when two cards have been selected...
-
   useEffect(() => {
     socket.emit('playersUpdate', username);
-    // socket.on('position', data => console.log(data));
-    // socket.on('playerJoin', data => console.log(data));
     socket.on('gameState', data => {
       console.log('my data');
       console.log(data);
@@ -39,7 +26,6 @@ const Game = ({ username }) => {
       setOtherPlayerName(otherPlayer);
     });
     socket.on('mismatchDelayUpdate', data => setMismatchDelaySubmit(data));
-
     socket.on('cardUpdate', data => {
       console.log('renreder');
       setCardSocketDatas(data);
@@ -49,8 +35,6 @@ const Game = ({ username }) => {
   useEffect(() => {
     console.log(cardSocketDatas);
   }, [cardSocketDatas]);
-
-  // When turn changes to this playrs turn, render the border box...
 
   // useEffect(() => {
   //   console.log(gameState);
@@ -78,6 +62,7 @@ const Game = ({ username }) => {
         emitCardClicked={emitCardClicked}
         isCurrentTurn={gameState.currentPlayerTurnName === username}
         socket={socket}
+        status={gameState.status}
       />
     );
   };
@@ -85,14 +70,18 @@ const Game = ({ username }) => {
   const emitTurnFinished = () => socket.emit('turnFinished', username);
   const emitCardClicked = index => socket.emit('cardClicked', index);
 
+  const onResetGameSubmit = () => {
+    // 1) Must reset both players score in server
+    socket.emit('reset', true);
+
+    // 2) Reset local variables
+  };
+
   const onConfirmCardsSubmit = () => {
-    console.log(numberOfCardsField);
-    //setNumberOfCardsSubmitSocket(numberOfCardsField);
     socket.emit('cardUpdate', numberOfCardsField);
   };
 
   const onDelaySubmit = () => {
-    //setMismatchDelaySubmitSocket(mismatchDelayField);
     socket.emit('mismatchDelayUpdate', mismatchDelayField);
   };
 
@@ -125,25 +114,53 @@ const Game = ({ username }) => {
 
         {/* Number of cards */}
         <div className="number-of-cards-field">
-          <InputText
-            inputFor="Number Of Cards"
+          <input
+            className="number-of-cards-input"
+            type="text"
+            name="number-of-cards-input"
             value={numberOfCardsField}
+            placeholder="Number of cards"
             onChange={onCardNumberChange}
           />
-          <InputButton inputFor="Confirm Cards" onClick={onConfirmCardsSubmit} />
+          <input
+            className="confirm-cards-button"
+            type="button"
+            name="confirm-cards-button"
+            value="Set Cards"
+            onClick={onConfirmCardsSubmit}
+          />
         </div>
 
         {/* Mismatch delay */}
         <div className="mismatch-delay-field">
-          <InputText
-            inputFor="Mismatch Delay"
+          <input
+            className="mismatch-delay-input"
+            type="text"
+            name="mismatch-delay-input"
             value={mismatchDelayField}
+            placeholder="Delay (ms)"
             onChange={onDelayChange}
           />
-          <InputButton inputFor="Set Mismatch Delay" onClick={onDelaySubmit} />
+          <input
+            className="mismatch-delay-button"
+            type="button"
+            name="mismatch-delay-button"
+            value="Set Mismatch Delay"
+            onClick={onDelaySubmit}
+          />
         </div>
 
+        {/* Game status display */}
         <div className="game-state">{`Status: ${gameState.status}`}</div>
+
+        {/* Reset Button */}
+        <input
+          className="reset-game-button"
+          type="button"
+          name="reset-game-button"
+          value="Reset Game"
+          onClick={onResetGameSubmit}
+        />
       </div>
     </div>
   );

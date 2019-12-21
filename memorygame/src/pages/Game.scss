@@ -19,10 +19,6 @@
   background: rgb(97, 106, 201);
   background: radial-gradient(circle, rgba(97, 106, 201, 1) 0%, rgba(74, 83, 179, 1) 71%);
 
-  & div {
-    //color: #858dd7;
-  }
-
   & .history {
     color: #858dd7;
     background: #272958;
@@ -35,8 +31,9 @@
     align-items: center;
   }
 
-  & .play-area {
-    //background: red;
+  & .reset-game-button {
+    margin-top: 30px;
+    pointer-events: all;
   }
 }
 
@@ -55,10 +52,5 @@
     flex-direction: column;
     padding: 30px;
     margin-top: 20px;
-  }
-
-  & .MismatchDelay-input,
-  .SetMismatchDelay-input {
-    //width: 100px;
   }
 }

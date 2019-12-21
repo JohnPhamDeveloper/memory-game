@@ -23,8 +23,23 @@ const Login = ({ setUsername }) => {
   return (
     <div className="login-page">
       <form className="login-form">
-        <InputText inputFor="Username" value={usernameField} onChange={onUsernameChange} />
-        <InputButton inputFor="Login" onClick={onSubmit} />
+        <input
+          className="username-input"
+          type="text"
+          name="username-input"
+          value={usernameField}
+          placeholder="Username"
+          onChange={onUsernameChange}
+        />
+        {/* <InputText inputFor="Username" value={usernameField} onChange={onUsernameChange} />
+        <InputButton inputFor="Login" onClick={onSubmit} /> */}
+        <input
+          className="login-button"
+          type="button"
+          name="login-button"
+          value="Login"
+          onClick={onSubmit}
+        />
       </form>
     </div>
   );

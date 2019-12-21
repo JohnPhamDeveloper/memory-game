@@ -16,7 +16,9 @@ let score = [0, 0]; // Would change playerDatas to an object with this included,
 
 const matchPointIncrement = 100;
 
-// Client connection
+/* * * * * * * * * * *
+ * CLIENT CONNECTION *
+ * * * * * * * * * * * */
 socketio.on('connection', socket => {
   socket.on('cardUpdate', data => {
     console.log('Updating cards: ', data);
@@ -30,12 +32,17 @@ socketio.on('connection', socket => {
     socketio.emit('cardUpdate', cardsData);
   });
 
+  /* * * * * * * * *
+   * CARDS MATCHED *
+   * * * * * * * * */
   socket.on('matchCardsUpdate', data => {
     matchedCardIndexes.push(...data);
     score[currentPlayerTurnIndex] += matchPointIncrement;
   });
 
-  // Add player names
+  /* * * * * * * * * * * *
+   * ADD PLAYER TO GAME  *
+   * * * * * * * * * * * */
   socket.on('playersUpdate', data => {
     if (data && playerDatas.length < 2) playerDatas.push(data);
     console.log(playerDatas);
@@ -48,7 +55,7 @@ socketio.on('connection', socket => {
         started: true,
         currentPlayerTurnName: playerDatas[currentPlayerTurnIndex],
         players: playerDatas,
-        status: 'Game started...',
+        status: 'Game Started',
         score,
       });
     } else {
@@ -62,11 +69,38 @@ socketio.on('connection', socket => {
     }
   });
 
-  // Tell other client that card was clicked
+  /* * * * * * * * * * * * * *
+   * CARD CLICKED IN CLIENT  *
+   * * * * * * * * * * * * * */
   socket.on('cardClicked', data => {
     socket.broadcast.emit('cardClicked', data);
   });
 
+  /* * * * * * *
+   * RESET GAME *
+   * * * * * * */
+  socket.on('reset', data => {
+    if (data === true) {
+      numberOfCards = 0;
+      cardsData = [];
+      matchedCardIndexes = [];
+      currentPlayerTurnIndex = 0;
+      score = [0, 0];
+    }
+
+    // Send new game state back for reset
+    socketio.emit('gameState', {
+      started: true,
+      currentPlayerTurnName: playerDatas[currentPlayerTurnIndex],
+      players: playerDatas,
+      status: 'Game Resetted',
+      score,
+    });
+  });
+
+  /* * * * * * * * *
+   * TURN FINISHED *
+   * * * * * * * * * */
   socket.on('turnFinished', data => {
     currentPlayerTurnIndex = (currentPlayerTurnIndex + 1) % playerDatas.length;
     console.log('current player turn index: ', currentPlayerTurnIndex);
@@ -90,9 +124,13 @@ socketio.on('connection', socket => {
     }
   });
 
+  /* * * * * * * * * * * * *
+   * MISMATCH DELAY UPDATE *
+   * * * * * * * * * * * * */
   socket.on('mismatchDelayUpdate', data => {
     console.log('Updating delay: ', data);
     mismatchDelay = data;
+    socketio.emit('mismatchDelayUpdate', data);
   });
 });
 
