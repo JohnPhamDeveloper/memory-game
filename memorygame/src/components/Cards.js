@@ -11,6 +11,7 @@ const Cards = ({
   socket,
   isCurrentTurn,
   status,
+  emitCardsMatched,
 }) => {
   const [cards, setCards] = useState([]); // Card components
   const [blockMouse, setBlockMouse] = useState(false);
@@ -125,7 +126,8 @@ const Cards = ({
         setPreviouslySelectedCards(oldArray => [...oldArray, cardIndex1, cardIndex2]);
         setCurrentSelectedCards([]);
         if (isCurrentTurn) {
-          socket.emit('matchCardsUpdate', [cardIndex1, cardIndex2]);
+          // socket.emit('matchCardsUpdate', { cards: [cardIndex1, cardIndex2], username });
+          emitCardsMatched([cardIndex1, cardIndex2]);
           //setBlockMouse(false);
           emitTurnFinished();
         }
@@ -141,9 +143,7 @@ const Cards = ({
 
           const tempCards = cards.slice();
 
-          // Re-enable those cards for click again and flip them
-          // But other user will also get it enabled...
-
+          // Clear the previous pointerEvent: 'none' so cards are clickable again
           tempCards[cardIndex1] = (
             <Card
               {...cards[cardIndex1].props}

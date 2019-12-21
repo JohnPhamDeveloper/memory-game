@@ -2,10 +2,9 @@ import React, { useState, useEffect } from 'react';
 import socketIOClient from 'socket.io-client';
 import './Game.scss';
 import Cards from '../components/Cards';
-//import InputText from '../components/InputText';
-//import InputButton from '../components/InputButton';
 import User from '../components/User';
 import Leaderboard from '../components/Leaderboard';
+import Modal from '../components/Modal';
 
 const socket = socketIOClient('http://localhost:4000');
 
@@ -18,6 +17,7 @@ const Game = ({ username }) => {
   const [cardSocketDatas, setCardSocketDatas] = useState([]);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [leaderboardData, setLeaderboardData] = useState({});
+  const [showFinishScreen, setShowFinishScreen] = useState(false);
 
   useEffect(() => {
     socket.emit('playersUpdate', username);
@@ -46,6 +46,14 @@ const Game = ({ username }) => {
     console.log(cardSocketDatas);
   }, [cardSocketDatas]);
 
+  useEffect(() => {
+    if (gameState.gameOver) {
+      setShowFinishScreen(true);
+    } else {
+      setShowFinishScreen(false);
+    }
+  }, [gameState.gameOver]);
+
   const renderCards = () => {
     if (cardSocketDatas.length <= 1)
       return <div className="card-number-error">Enter number of playing cards!</div>;
@@ -58,6 +66,7 @@ const Game = ({ username }) => {
         isCurrentTurn={gameState.currentPlayerTurnName === username}
         socket={socket}
         status={gameState.status}
+        emitCardsMatched={emitCardsMatched}
       />
     );
   };
@@ -69,6 +78,7 @@ const Game = ({ username }) => {
     // 2) Reset local variables
   };
 
+  const onFinishScreenClose = () => setShowFinishScreen(false);
   const onCardNumberChange = e => setNumberOfCardsField(e.target.value);
   const onDelayChange = e => setMismatchDelayField(e.target.value);
   const onConfirmCardsSubmit = () => socket.emit('cardUpdate', numberOfCardsField);
@@ -77,6 +87,7 @@ const Game = ({ username }) => {
   const onLeaderboardClose = () => setShowLeaderboard(false);
   const emitTurnFinished = () => socket.emit('turnFinished', username);
   const emitCardClicked = index => socket.emit('cardClicked', index);
+  const emitCardsMatched = cards => socket.emit('matchCardsUpdate', { cards, username });
 
   return (
     <div
@@ -94,7 +105,9 @@ const Game = ({ username }) => {
             gameState.currentPlayerTurnName === username ? 'user-info--active' : ''
           }`}
           username={username}
-          score={gameState.score && gameState.score[0]}
+          score={
+            gameState && gameState.playerDataObjects && gameState.playerDataObjects[username].score
+          }
         />
 
         <User
@@ -102,7 +115,12 @@ const Game = ({ username }) => {
             gameState.currentPlayerTurnName !== username ? 'user-info--active' : ''
           }`}
           username={otherPlayerName}
-          score={gameState.score && gameState.score[1]}
+          score={
+            gameState &&
+            gameState.playerDataObjects &&
+            gameState.playerDataObjects[otherPlayerName] &&
+            gameState.playerDataObjects[otherPlayerName].score
+          }
         />
 
         {/* Number of cards */}
@@ -169,6 +187,9 @@ const Game = ({ username }) => {
         onClose={onLeaderboardClose}
         leaderboardData={leaderboardData}
       />
+      <Modal show={showFinishScreen} onClose={onFinishScreenClose}>
+        <h2>You Win/Lose/Tied</h2>
+      </Modal>
     </div>
   );
 };

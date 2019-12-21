@@ -5,15 +5,15 @@ const cors = require('cors');
 
 express.use(cors());
 
-let leaderboard = {};
 let gameStarted = false;
 let numberOfCards = 0;
-let mismatchDelay = 1000;
+//let mismatchDelay = 1000;
 let cardsData = [];
-let playerDatas = [];
+let playerDatas = []; // Only username, turn order
+let playerDataObjects = {}; // object for all players with username as key
 let matchedCardIndexes = [];
 let currentPlayerTurnIndex = 0;
-let score = [0, 0]; // Would change playerDatas to an object with this included, but would require refactoring in frontend (no time)
+let currentPlayerTurnName = '';
 
 const matchPointIncrement = 100;
 
@@ -35,32 +35,24 @@ socketio.on('connection', socket => {
 
   /* * * * * * * * *
    * CARDS MATCHED *
+   * {
+   *    cards: [int]
+   *    username: [string]
+   * }
    * * * * * * * * */
   socket.on('matchCardsUpdate', data => {
-    matchedCardIndexes.push(...data);
-    score[currentPlayerTurnIndex] += matchPointIncrement;
+    // Add matched cards to count towards ending the game
+    matchedCardIndexes.push(...data.cards);
 
-    // Set new higher score
-    const username = playerDatas[currentPlayerTurnIndex];
-    console.log('leaderboard');
-    console.log(score[currentPlayerTurnIndex]);
-    console.log(leaderboard[playerDatas[currentPlayerTurnIndex]].score);
-    if (
-      leaderboard &&
-      leaderboard[playerDatas[currentPlayerTurnIndex]] &&
-      leaderboard[playerDatas[currentPlayerTurnIndex]].score <
-        score[currentPlayerTurnIndex]
-    ) {
-      leaderboard[playerDatas[currentPlayerTurnIndex]].score =
-        score[currentPlayerTurnIndex];
-    }
+    // Increment the score for the person who made that match
+    playerDataObjects[data.username] = {
+      score: (playerDataObjects[data.username].score += matchPointIncrement),
+    };
 
-    console.log(leaderboard);
-
-    const arrayLeaderboard = Object.keys(leaderboard).map(key => {
+    const arrayLeaderboard = Object.keys(playerDataObjects).map(key => {
       return {
         username: key,
-        score: leaderboard[key].score,
+        score: playerDataObjects[key].score,
       };
     });
 
@@ -73,14 +65,18 @@ socketio.on('connection', socket => {
   /* * * * * * * * * * * *
    * ADD PLAYER TO GAME  *
    * * * * * * * * * * * */
-  socket.on('playersUpdate', data => {
-    if (data && playerDatas.length < 2) {
-      leaderboard[data] = {
+  socket.on('playersUpdate', username => {
+    // Max two players only
+    if (username && playerDatas.length < 2) {
+      // leaderboard[username] = {
+      //   score: 0,
+      // };
+      playerDataObjects[username] = {
         score: 0,
       };
-      playerDatas.push(data);
+      playerDatas.push(username);
     }
-    console.log(playerDatas);
+    // console.log(playerDatas);
 
     // Start game with two players
     if (playerDatas.length >= 2 && !gameStarted) {
@@ -88,18 +84,24 @@ socketio.on('connection', socket => {
 
       socketio.emit('gameState', {
         started: true,
-        currentPlayerTurnName: playerDatas[currentPlayerTurnIndex],
+        currentPlayerTurnName,
+        playerDataObjects,
+        currentPlayerTurnIndex,
+        currentPlayerTurnInformation: playerDataObjects[currentPlayerTurnName],
         players: playerDatas,
         status: 'Game Started',
-        score,
+        // score,
       });
     } else {
       socketio.emit('gameState', {
         started: false,
+        playerDataObjects,
+        currentPlayerTurnIndex,
+        currentPlayerTurnInformation: playerDataObjects[currentPlayerTurnName],
         currentPlayerTurnName: '',
         players: playerDatas,
         status: 'Need more players...',
-        score,
+        // score,
       });
     }
   });
@@ -120,16 +122,19 @@ socketio.on('connection', socket => {
       cardsData = [];
       matchedCardIndexes = [];
       currentPlayerTurnIndex = 0;
-      score = [0, 0];
+      // score = [0, 0];
     }
 
     // Send new game state back for reset
     socketio.emit('gameState', {
       started: true,
+      playerDataObjects,
+      currentPlayerTurnIndex,
+      currentPlayerTurnInformation: playerDataObjects[currentPlayerTurnName],
       currentPlayerTurnName: playerDatas[currentPlayerTurnIndex],
       players: playerDatas,
       status: 'Game Resetted',
-      score,
+      // score,
     });
   });
 
@@ -138,23 +143,32 @@ socketio.on('connection', socket => {
    * * * * * * * * * */
   socket.on('turnFinished', data => {
     currentPlayerTurnIndex = (currentPlayerTurnIndex + 1) % playerDatas.length;
+    currentPlayerTurnName = playerDatas[currentPlayerTurnIndex];
     console.log('current player turn index: ', currentPlayerTurnIndex);
     // Game is over
     if (matchedCardIndexes.length === cardsData.length) {
       socketio.emit('gameState', {
         started: false,
-        currentPlayerTurnName: '',
+        playerDataObjects,
+        currentPlayerTurnIndex,
+        currentPlayerTurnName,
+        currentPlayerTurnInformation: playerDataObjects[currentPlayerTurnName],
         players: playerDatas,
         status: 'Game over!',
-        score,
+        gameOver: true,
+        // score,
       });
     } else {
       socketio.emit('gameState', {
-        started: gameStarted,
-        currentPlayerTurnName: playerDatas[currentPlayerTurnIndex],
+        started: true,
+        playerDataObjects,
+        currentPlayerTurnIndex,
+        currentPlayerTurnName,
+        currentPlayerTurnInformation: playerDataObjects[currentPlayerTurnName],
         players: playerDatas,
-        status: `Turn waiting...`,
-        score,
+        gameOver: false,
+        status: `${currentPlayerTurnName} turn...`,
+        // score,
       });
     }
   });
