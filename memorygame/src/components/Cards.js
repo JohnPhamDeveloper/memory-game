@@ -3,7 +3,14 @@ import { generatePlayingCards, shuffleCards } from './Cards.controller';
 import Card from './Card';
 import './Cards.scss';
 
-const Cards = ({ mismatchDelay, cardSocketDatas, emitTurnFinished }) => {
+const Cards = ({
+  mismatchDelay,
+  cardSocketDatas,
+  emitTurnFinished,
+  emitCardClicked,
+  socket,
+  isCurrentTurn,
+}) => {
   const [cards, setCards] = useState([]); // Card components
   const [blockMouse, setBlockMouse] = useState(false);
   const [currentSelectedCards, setCurrentSelectedCards] = useState([]); // Cards currently selected by player
@@ -22,7 +29,23 @@ const Cards = ({ mismatchDelay, cardSocketDatas, emitTurnFinished }) => {
       console.log('generate');
       generateCards();
     }
+    socket.on('cardClicked', data => {
+      // Set the card to be clicked
+      console.log('ths card was clicked', data);
+      showCardInDeck(data);
+    });
   }, [cardSocketDatas]);
+
+  const showCardInDeck = index => {
+    setCurrentSelectedCards(oldArray => [...oldArray, index]);
+    const tempCards = cardsRef.current.slice();
+    const selectedCardComponent = tempCards[index];
+    const updatedCardComponent = (
+      <Card {...selectedCardComponent.props} key={selectedCardComponent.props.id} showCard />
+    );
+    tempCards[index] = updatedCardComponent;
+    setCards(tempCards);
+  };
 
   useEffect(() => {
     console.log('updated cards show');
@@ -66,7 +89,6 @@ const Cards = ({ mismatchDelay, cardSocketDatas, emitTurnFinished }) => {
 
       tempCards[previouslySelectedCards[i]] = updatedCardComponent;
     }
-
     setCards(tempCards);
 
     console.log('updated');
@@ -89,7 +111,12 @@ const Cards = ({ mismatchDelay, cardSocketDatas, emitTurnFinished }) => {
         setCurrentSelectedCards([]);
         setPreviouslySelectedCards(oldArray => [...oldArray, cardIndex1, cardIndex2]);
         setBlockMouse(false);
-        emitTurnFinished();
+        if (isCurrentTurn) {
+          console.log('SOCKEMETETMKTMTKT');
+          console.log(socket);
+          socket.emit('matchCardsUpdate', [cardIndex1, cardIndex2]);
+          emitTurnFinished();
+        }
       } else {
         // Bad match, so "flip" them back
         // Wait 2 second so they can see the second card
@@ -112,7 +139,9 @@ const Cards = ({ mismatchDelay, cardSocketDatas, emitTurnFinished }) => {
 
           setCards(tempCards);
           setBlockMouse(false);
-          emitTurnFinished();
+          if (isCurrentTurn) {
+            emitTurnFinished();
+          }
         }, mismatchDelay);
       }
 
@@ -132,10 +161,10 @@ const Cards = ({ mismatchDelay, cardSocketDatas, emitTurnFinished }) => {
   const onCardClick = (index, number) => {
     console.log('Index: ', index);
     console.log('Number: ', number);
-    // move to server
+    // move to server?
     setCurrentSelectedCards(oldArray => [...oldArray, index]);
 
-    console.log(cardsRef.current);
+    emitCardClicked(index);
 
     const tempCards = cardsRef.current.slice();
     const selectedCardComponent = tempCards[index];
@@ -151,10 +180,7 @@ const Cards = ({ mismatchDelay, cardSocketDatas, emitTurnFinished }) => {
   };
 
   return (
-    <div
-      className="cards"
-      style={blockMouse ? { pointerEvents: 'none' } : { pointerEvents: 'all' }}
-    >
+    <div className="cards" style={blockMouse ? { pointerEvents: 'none' } : { pointerEvents: '' }}>
       {renderCards()}
     </div>
   );

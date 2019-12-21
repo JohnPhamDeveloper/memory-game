@@ -10,7 +10,11 @@ let numberOfCards = 0;
 let mismatchDelay = 1000;
 let cardsData = [];
 let playerDatas = [];
+let matchedCardIndexes = [];
 let currentPlayerTurnIndex = 0;
+let score = [0, 0]; // Would change playerDatas to an object with this included, but would require refactoring in frontend (no time)
+
+const matchPointIncrement = 100;
 
 // Client connection
 socketio.on('connection', socket => {
@@ -26,33 +30,64 @@ socketio.on('connection', socket => {
     socketio.emit('cardUpdate', cardsData);
   });
 
+  socket.on('matchCardsUpdate', data => {
+    matchedCardIndexes.push(...data);
+    score[currentPlayerTurnIndex] += matchPointIncrement;
+  });
+
   // Add player names
   socket.on('playersUpdate', data => {
-    if (data) playerDatas.push(data);
+    if (data && playerDatas.length < 2) playerDatas.push(data);
     console.log(playerDatas);
 
     // Start game with two players
     if (playerDatas.length >= 2 && !gameStarted) {
-      gameStarted = true;
       currentPlayerTurnName = playerDatas[0]; // This players turn
 
       socketio.emit('gameState', {
-        started: gameStarted,
+        started: true,
         currentPlayerTurnName: playerDatas[currentPlayerTurnIndex],
         players: playerDatas,
+        status: 'Game started...',
+        score,
+      });
+    } else {
+      socketio.emit('gameState', {
+        started: false,
+        currentPlayerTurnName: '',
+        players: playerDatas,
+        status: 'Need more players...',
+        score,
       });
     }
+  });
+
+  // Tell other client that card was clicked
+  socket.on('cardClicked', data => {
+    socket.broadcast.emit('cardClicked', data);
   });
 
   socket.on('turnFinished', data => {
     currentPlayerTurnIndex = (currentPlayerTurnIndex + 1) % playerDatas.length;
     console.log('current player turn index: ', currentPlayerTurnIndex);
-
-    socketio.emit('gameState', {
-      stated: gameStarted,
-      currentPlayerTurnName: playerDatas[currentPlayerTurnIndex],
-      players: playerDatas,
-    });
+    // Game is over
+    if (matchedCardIndexes.length === cardsData.length) {
+      socketio.emit('gameState', {
+        started: false,
+        currentPlayerTurnName: '',
+        players: playerDatas,
+        status: 'Game over!',
+        score,
+      });
+    } else {
+      socketio.emit('gameState', {
+        started: gameStarted,
+        currentPlayerTurnName: playerDatas[currentPlayerTurnIndex],
+        players: playerDatas,
+        status: `Turn waiting...`,
+        score,
+      });
+    }
   });
 
   socket.on('mismatchDelayUpdate', data => {

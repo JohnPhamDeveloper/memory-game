@@ -33,34 +33,6 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-
-    & .user-info {
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
-      align-items: center;
-      // border: 1px solid #858dd7;
-      width: 150px;
-      height: 40px;
-      padding: 10px;
-
-      &--active {
-        border: 1px solid #858dd7;
-      }
-
-      &--1 {
-        margin-top: 30px;
-      }
-
-      &--2 {
-        margin-top: 15px;
-      }
-    }
-
-    & .fa-user {
-      width: 25px;
-      margin-right: 15px;
-    }
   }
 
   & .play-area {
@@ -72,10 +44,10 @@
   height: 70vh;
   align-self: center;
 
-  // & > div {
-  //   margin-top: 30px;
-  //   padding: 30px;
-  // }
+  & .game-state {
+    color: white;
+    font-size: 12px;
+  }
 
   & .number-of-cards-field,
   .mismatch-delay-field {
