@@ -23,6 +23,9 @@ const Cards = ({
   const cardsRef = useRef(cards);
   const timeoutRef = useRef(null); // When wrong cards are selected, show them for a bit before flipping
 
+  /* * * * * * * * *
+   * CARD CLICKED EVENT
+   * * * * * * * * * */
   useEffect(() => {
     socket.on('cardClicked', data => {
       // Set the card to be clicked
@@ -41,37 +44,36 @@ const Cards = ({
   }, [status]);
 
   useEffect(() => {
-    console.log('UPDATEDDD');
-    console.log(cardSocketDatas);
-    if (cardSocketDatas) {
-      generateCards();
-    }
+    if (cardSocketDatas) generateCards();
   }, [cardSocketDatas]);
+
+  useEffect(() => {
+    if (!isCurrentTurn) {
+      setBlockMouse(true);
+    } else {
+      setBlockMouse(false);
+    }
+  }, [isCurrentTurn]);
 
   const showCardInDeck = index => {
     setCurrentSelectedCards(oldArray => [...oldArray, index]);
     const tempCards = cardsRef.current.slice();
     const selectedCardComponent = tempCards[index];
     const updatedCardComponent = (
-      <Card {...selectedCardComponent.props} key={selectedCardComponent.props.id} showCard />
+      <Card
+        {...selectedCardComponent.props}
+        key={selectedCardComponent.props.id}
+        style={{ pointerEvents: 'none', backgroundColor: 'pink' }}
+        showCard
+      />
     );
     tempCards[index] = updatedCardComponent;
     setCards(tempCards);
   };
 
   useEffect(() => {
-    console.log('updated cards show');
-    console.log(cards);
     cardsRef.current = cards;
   }, [cards]);
-
-  // useEffect(() => {
-  //   // Re-generate cards since cards were cleared
-  //   if (cards && cards.length <= 0) generateCards();
-
-  //   // Used in onClick function to prevent stale state
-  //   cardsRef.current = cards;
-  // }, [cards]);
 
   useEffect(() => {
     // Game is over when all cards are selected
@@ -120,13 +122,11 @@ const Cards = ({
       // Check if the two cards are the same number
       if (cardNumber1 === cardNumber2) {
         console.log('Matched');
-        setCurrentSelectedCards([]);
         setPreviouslySelectedCards(oldArray => [...oldArray, cardIndex1, cardIndex2]);
-        setBlockMouse(false);
+        setCurrentSelectedCards([]);
         if (isCurrentTurn) {
-          console.log('SOCKEMETETMKTMTKT');
-          console.log(socket);
           socket.emit('matchCardsUpdate', [cardIndex1, cardIndex2]);
+          //setBlockMouse(false);
           emitTurnFinished();
         }
       } else {
@@ -141,23 +141,35 @@ const Cards = ({
 
           const tempCards = cards.slice();
 
+          // Re-enable those cards for click again and flip them
+          // But other user will also get it enabled...
+
           tempCards[cardIndex1] = (
-            <Card {...cards[cardIndex1].props} key={cards[cardIndex1].props.id} showCard={false} />
+            <Card
+              {...cards[cardIndex1].props}
+              key={cards[cardIndex1].props.id}
+              style={{}}
+              showCard={false}
+            />
           );
 
           tempCards[cardIndex2] = (
-            <Card {...cards[cardIndex2].props} key={cards[cardIndex2].props.id} showCard={false} />
+            <Card
+              {...cards[cardIndex2].props}
+              key={cards[cardIndex2].props.id}
+              style={{}}
+              showCard={false}
+            />
           );
 
           setCards(tempCards);
-          setBlockMouse(false);
+          setCurrentSelectedCards([]);
           if (isCurrentTurn) {
+            //setBlockMouse(false);
             emitTurnFinished();
           }
         }, mismatchDelay);
       }
-
-      setCurrentSelectedCards([]);
     }
   }, [currentSelectedCards]);
 
@@ -174,17 +186,22 @@ const Cards = ({
     console.log('Index: ', index);
     console.log('Number: ', number);
     // move to server?
-    setCurrentSelectedCards(oldArray => [...oldArray, index]);
+    //setCurrentSelectedCards(oldArray => [...oldArray, index]);
 
     emitCardClicked(index);
 
-    const tempCards = cardsRef.current.slice();
-    const selectedCardComponent = tempCards[index];
-    const updatedCardComponent = (
-      <Card {...selectedCardComponent.props} key={selectedCardComponent.props.id} showCard />
-    );
-    tempCards[index] = updatedCardComponent;
-    setCards(tempCards);
+    //   const tempCards = cardsRef.current.slice();
+    //   const selectedCardComponent = tempCards[index];
+    //   const updatedCardComponent = (
+    //     <Card
+    //       {...selectedCardComponent.props}
+    //       key={selectedCardComponent.props.id}
+    //       style={{ pointerEvents: 'none' }}
+    //       showCard
+    //     />
+    //   );
+    //   tempCards[index] = updatedCardComponent;
+    //   setCards(tempCards);
   };
 
   const renderCards = () => {

@@ -5,6 +5,7 @@ const cors = require('cors');
 
 express.use(cors());
 
+let leaderboard = {};
 let gameStarted = false;
 let numberOfCards = 0;
 let mismatchDelay = 1000;
@@ -38,13 +39,47 @@ socketio.on('connection', socket => {
   socket.on('matchCardsUpdate', data => {
     matchedCardIndexes.push(...data);
     score[currentPlayerTurnIndex] += matchPointIncrement;
+
+    // Set new higher score
+    const username = playerDatas[currentPlayerTurnIndex];
+    console.log('leaderboard');
+    console.log(score[currentPlayerTurnIndex]);
+    console.log(leaderboard[playerDatas[currentPlayerTurnIndex]].score);
+    if (
+      leaderboard &&
+      leaderboard[playerDatas[currentPlayerTurnIndex]] &&
+      leaderboard[playerDatas[currentPlayerTurnIndex]].score <
+        score[currentPlayerTurnIndex]
+    ) {
+      leaderboard[playerDatas[currentPlayerTurnIndex]].score =
+        score[currentPlayerTurnIndex];
+    }
+
+    console.log(leaderboard);
+
+    const arrayLeaderboard = Object.keys(leaderboard).map(key => {
+      return {
+        username: key,
+        score: leaderboard[key].score,
+      };
+    });
+
+    console.log(arrayLeaderboard);
+
+    arrayLeaderboard.sort((a, b) => (a.score < b.score ? 1 : -1));
+    socketio.emit('leaderboardUpdate', arrayLeaderboard);
   });
 
   /* * * * * * * * * * * *
    * ADD PLAYER TO GAME  *
    * * * * * * * * * * * */
   socket.on('playersUpdate', data => {
-    if (data && playerDatas.length < 2) playerDatas.push(data);
+    if (data && playerDatas.length < 2) {
+      leaderboard[data] = {
+        score: 0,
+      };
+      playerDatas.push(data);
+    }
     console.log(playerDatas);
 
     // Start game with two players
@@ -73,7 +108,7 @@ socketio.on('connection', socket => {
    * CARD CLICKED IN CLIENT  *
    * * * * * * * * * * * * * */
   socket.on('cardClicked', data => {
-    socket.broadcast.emit('cardClicked', data);
+    socketio.emit('cardClicked', data);
   });
 
   /* * * * * * *

@@ -5,6 +5,7 @@ import Cards from '../components/Cards';
 //import InputText from '../components/InputText';
 //import InputButton from '../components/InputButton';
 import User from '../components/User';
+import Leaderboard from '../components/Leaderboard';
 
 const socket = socketIOClient('http://localhost:4000');
 
@@ -15,6 +16,8 @@ const Game = ({ username }) => {
   const [otherPlayerName, setOtherPlayerName] = useState('');
   const [gameState, setGameState] = useState({});
   const [cardSocketDatas, setCardSocketDatas] = useState([]);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [leaderboardData, setLeaderboardData] = useState({});
 
   useEffect(() => {
     socket.emit('playersUpdate', username);
@@ -25,6 +28,13 @@ const Game = ({ username }) => {
       const otherPlayer = data.players.filter(name => name !== username);
       setOtherPlayerName(otherPlayer);
     });
+
+    socket.on('leaderboardUpdate', data => {
+      setLeaderboardData(data);
+      console.log('leaderboard');
+      console.log(data);
+    });
+
     socket.on('mismatchDelayUpdate', data => setMismatchDelaySubmit(data));
     socket.on('cardUpdate', data => {
       console.log('renreder');
@@ -35,21 +45,6 @@ const Game = ({ username }) => {
   useEffect(() => {
     console.log(cardSocketDatas);
   }, [cardSocketDatas]);
-
-  // useEffect(() => {
-  //   console.log(gameState);
-  // }, [gameState]);
-
-  // useEffect(() => {
-  //   socket.emit('cardUpdate', numberOfCardsField);
-  // }, [numberOfCardsSubmitSocket]);
-
-  // useEffect(() => {
-  //   socket.emit('mismatchDelayUpdate', mismatchDelayField);
-  // }, [mismatchDelaySubmitSocket]);
-
-  const onCardNumberChange = e => setNumberOfCardsField(e.target.value);
-  const onDelayChange = e => setMismatchDelayField(e.target.value);
 
   const renderCards = () => {
     if (cardSocketDatas.length <= 1)
@@ -67,9 +62,6 @@ const Game = ({ username }) => {
     );
   };
 
-  const emitTurnFinished = () => socket.emit('turnFinished', username);
-  const emitCardClicked = index => socket.emit('cardClicked', index);
-
   const onResetGameSubmit = () => {
     // 1) Must reset both players score in server
     socket.emit('reset', true);
@@ -77,13 +69,14 @@ const Game = ({ username }) => {
     // 2) Reset local variables
   };
 
-  const onConfirmCardsSubmit = () => {
-    socket.emit('cardUpdate', numberOfCardsField);
-  };
-
-  const onDelaySubmit = () => {
-    socket.emit('mismatchDelayUpdate', mismatchDelayField);
-  };
+  const onCardNumberChange = e => setNumberOfCardsField(e.target.value);
+  const onDelayChange = e => setMismatchDelayField(e.target.value);
+  const onConfirmCardsSubmit = () => socket.emit('cardUpdate', numberOfCardsField);
+  const onDelaySubmit = () => socket.emit('mismatchDelayUpdate', mismatchDelayField);
+  const onLeaderboardSubmit = () => setShowLeaderboard(true);
+  const onLeaderboardClose = () => setShowLeaderboard(false);
+  const emitTurnFinished = () => socket.emit('turnFinished', username);
+  const emitCardClicked = index => socket.emit('cardClicked', index);
 
   return (
     <div
@@ -161,7 +154,21 @@ const Game = ({ username }) => {
           value="Reset Game"
           onClick={onResetGameSubmit}
         />
+
+        {/* Leaderboard button */}
+        <input
+          className="leaderboard-button"
+          type="button"
+          name="leaderboard-button"
+          value="Open Leaderboards"
+          onClick={onLeaderboardSubmit}
+        />
       </div>
+      <Leaderboard
+        show={showLeaderboard}
+        onClose={onLeaderboardClose}
+        leaderboardData={leaderboardData}
+      />
     </div>
   );
 };
