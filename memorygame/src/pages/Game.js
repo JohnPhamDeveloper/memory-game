@@ -12,18 +12,24 @@ const Game = ({ username }) => {
   const [numberOfCardsField, setNumberOfCardsField] = useState('');
   const [mismatchDelayField, setMismatchDelayField] = useState('');
   const [mismatchDelaySubmit, setMismatchDelaySubmit] = useState(2000);
+  const [resetCards, setResetCards] = useState(true);
   const [otherPlayerName, setOtherPlayerName] = useState('');
   const [gameState, setGameState] = useState({});
   const [cardSocketDatas, setCardSocketDatas] = useState([]);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [leaderboardData, setLeaderboardData] = useState({});
   const [showFinishScreen, setShowFinishScreen] = useState(false);
+  const [cardsClickedIndexes, setCardsClickedIndexes] = useState([]);
+  const [blockMouse, setBlockMouse] = useState(false);
 
   useEffect(() => {
     socket.emit('playersUpdate', username);
+
+    socket.on('cardClicked', currentCardsClickedIndexes => {
+      setCardsClickedIndexes(currentCardsClickedIndexes);
+    });
+
     socket.on('gameState', data => {
-      console.log('my data');
-      console.log(data);
       setGameState(data);
       const otherPlayer = data.players.filter(name => name !== username);
       setOtherPlayerName(otherPlayer);
@@ -32,19 +38,14 @@ const Game = ({ username }) => {
     socket.on('leaderboardUpdate', data => {
       setLeaderboardData(data);
       console.log('leaderboard');
-      console.log(data);
     });
 
     socket.on('mismatchDelayUpdate', data => setMismatchDelaySubmit(data));
+
     socket.on('cardUpdate', data => {
-      console.log('renreder');
       setCardSocketDatas(data);
     });
   }, []);
-
-  useEffect(() => {
-    console.log(cardSocketDatas);
-  }, [cardSocketDatas]);
 
   useEffect(() => {
     if (gameState.gameOver) {
@@ -54,19 +55,28 @@ const Game = ({ username }) => {
     }
   }, [gameState.gameOver]);
 
+  useEffect(() => {
+    if (gameState.reset) {
+      setResetCards(true);
+    } else {
+      setResetCards(false);
+    }
+  }, [gameState.reset]);
+
   const renderCards = () => {
     if (cardSocketDatas.length <= 1)
       return <div className="card-number-error">Enter number of playing cards!</div>;
     return (
       <Cards
+        onCardClick={onCardClick}
+        onCardsWillCompare={onCardsWillCompare}
+        onCardsMatched={onCardsMatched}
+        onCardsMismatched={onCardsMismatched}
+        showCardsOfIndexes={cardsClickedIndexes}
+        resetCards={resetCards}
+        cardsClickedIndexes={cardsClickedIndexes}
         mismatchDelay={mismatchDelaySubmit}
-        cardSocketDatas={cardSocketDatas}
-        emitTurnFinished={emitTurnFinished}
-        emitCardClicked={emitCardClicked}
-        isCurrentTurn={gameState.currentPlayerTurnName === username}
-        socket={socket}
-        status={gameState.status}
-        emitCardsMatched={emitCardsMatched}
+        cardsDatas={cardSocketDatas}
       />
     );
   };
@@ -82,15 +92,64 @@ const Game = ({ username }) => {
   const emitTurnFinished = () => socket.emit('turnFinished', username);
   const emitCardClicked = index => socket.emit('cardClicked', index);
   const emitCardsMatched = cards => socket.emit('matchCardsUpdate', { cards, username });
+  const onCardClick = index => emitCardClicked(index);
+  const isCurrentTurn = () => gameState.currentPlayerTurnName === username;
+
+  const onCardsWillCompare = () => {
+    if (isCurrentTurn()) {
+      setBlockMouse(true);
+    }
+  };
+
+  const onCardsMatched = cards => {
+    if (isCurrentTurn()) {
+      emitCardsMatched(cards);
+      emitTurnFinished();
+      setBlockMouse(false);
+    }
+  };
+
+  const onCardsMismatched = () => {
+    if (isCurrentTurn()) {
+      emitTurnFinished();
+      setBlockMouse(false);
+    }
+  };
+
+  const hasThisPlayerWon = () =>
+    gameState.playerDataObjects[username].score >
+    gameState.playerDataObjects[otherPlayerName].score;
+
+  const hasOtherPlayerWon = () =>
+    gameState.playerDataObjects[username].score <
+    gameState.playerDataObjects[otherPlayerName].score;
+
+  const renderGameoverMessage = () => {
+    if (
+      !gameState ||
+      !gameState.playerDataObjects ||
+      !gameState.playerDataObjects[otherPlayerName] ||
+      !gameState.playerDataObjects[username]
+    )
+      return <></>;
+
+    let message = '';
+    // THIS player won
+    if (hasThisPlayerWon()) {
+      message = 'You Win!';
+    } else if (hasOtherPlayerWon()) {
+      message = 'You Lose!';
+    } else {
+      message = 'You Tied!';
+    }
+
+    return <h2>{message}</h2>;
+  };
 
   return (
     <div
       className="game-page"
-      style={
-        gameState.currentPlayerTurnName === username
-          ? { pointerEvents: 'all' }
-          : { pointerEvents: 'none' }
-      }
+      style={isCurrentTurn() && !blockMouse ? { pointerEvents: 'all' } : { pointerEvents: 'none' }}
     >
       {renderCards()}
       <div className="history">
@@ -182,7 +241,7 @@ const Game = ({ username }) => {
         leaderboardData={leaderboardData}
       />
       <Modal show={showFinishScreen} onClose={onFinishScreenClose}>
-        <h2>You Win/Lose/Tied</h2>
+        {renderGameoverMessage()}
       </Modal>
     </div>
   );

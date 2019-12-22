@@ -12,6 +12,7 @@ let cardsData = [];
 let playerDatas = []; // Only username, turn order
 let playerDataObjects = {}; // object for all players with username as key
 let matchedCardIndexes = [];
+let currentCardsClickedIndexes = [];
 let currentPlayerTurnIndex = 0;
 let currentPlayerTurnName = '';
 
@@ -93,8 +94,8 @@ socketio.on('connection', socket => {
         currentPlayerTurnIndex,
         currentPlayerTurnInformation: playerDataObjects[currentPlayerTurnName],
         players: playerDatas,
+        gameOver: false,
         status: 'Game Started',
-        // score,
       });
     } else {
       socketio.emit('gameState', {
@@ -104,8 +105,8 @@ socketio.on('connection', socket => {
         currentPlayerTurnInformation: playerDataObjects[currentPlayerTurnName],
         currentPlayerTurnName: '',
         players: playerDatas,
+        gameOver: false,
         status: 'Need more players...',
-        // score,
       });
     }
   });
@@ -113,8 +114,9 @@ socketio.on('connection', socket => {
   /* * * * * * * * * * * * * *
    * CARD CLICKED IN CLIENT  *
    * * * * * * * * * * * * * */
-  socket.on('cardClicked', data => {
-    socketio.emit('cardClicked', data);
+  socket.on('cardClicked', index => {
+    currentCardsClickedIndexes.push(index);
+    socketio.emit('cardClicked', currentCardsClickedIndexes);
   });
 
   /* * * * * * *
@@ -128,11 +130,16 @@ socketio.on('connection', socket => {
    * TURN FINISHED *
    * * * * * * * * * */
   socket.on('turnFinished', data => {
+    // Tell client that there's no cards selected
+    currentCardsClickedIndexes = [];
+    socketio.emit('cardClicked', currentCardsClickedIndexes);
+
     currentPlayerTurnIndex = (currentPlayerTurnIndex + 1) % playerDatas.length;
     currentPlayerTurnName = playerDatas[currentPlayerTurnIndex];
     console.log('current player turn index: ', currentPlayerTurnIndex);
+
     // Game is over
-    if (matchedCardIndexes.length === cardsData.length) {
+    if (allCardsMatched()) {
       socketio.emit('gameState', {
         started: false,
         playerDataObjects,
@@ -142,7 +149,6 @@ socketio.on('connection', socket => {
         players: playerDatas,
         status: 'Game over!',
         gameOver: true,
-        // score,
       });
     } else {
       socketio.emit('gameState', {
@@ -153,8 +159,8 @@ socketio.on('connection', socket => {
         currentPlayerTurnInformation: playerDataObjects[currentPlayerTurnName],
         players: playerDatas,
         gameOver: false,
+        reset: false,
         status: `${currentPlayerTurnName} turn...`,
-        // score,
       });
     }
   });
@@ -201,11 +207,18 @@ const generatePlayingCards = () => {
   return tempCards;
 };
 
+const allCardsMatched = () => matchedCardIndexes.length === cardsData.length;
+
 const reset = () => {
   numberOfCards = 0;
   cardsData = [];
   matchedCardIndexes = [];
-  //currentPlayerTurnIndex = 0;
+  currentCardsClickedIndexes = [];
+
+  // Reset score
+  playerDatas.forEach(playerData => {
+    playerDataObjects[playerData].score = 0;
+  });
 
   // Send new game state back for reset
   socketio.emit('gameState', {
@@ -215,6 +228,8 @@ const reset = () => {
     currentPlayerTurnInformation: playerDataObjects[currentPlayerTurnName],
     currentPlayerTurnName: playerDatas[currentPlayerTurnIndex],
     players: playerDatas,
+    reset: true,
+    gameOver: false,
     status: 'Game Resetted',
   });
 };

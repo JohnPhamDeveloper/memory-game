@@ -23,8 +23,11 @@ const Login = ({ setUsername }) => {
   return (
     <div className="login-page">
       <form className="login-form">
+        <label htmlFor="username-input" style={{ opacity: '0' }}>
+          Username
+        </label>
         <input
-          className="username-input"
+          id="username-input"
           type="text"
           name="username-input"
           value={usernameField}
@@ -33,6 +36,9 @@ const Login = ({ setUsername }) => {
         />
         {/* <InputText inputFor="Username" value={usernameField} onChange={onUsernameChange} />
         <InputButton inputFor="Login" onClick={onSubmit} /> */}
+        <label htmlFor="username-input" style={{ opacity: '0' }}>
+          Password
+        </label>
         <input
           className="login-button"
           type="button"

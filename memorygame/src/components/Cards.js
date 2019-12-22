@@ -1,21 +1,19 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { generatePlayingCards, shuffleCards } from './Cards.controller';
+import { generatePlayingCards } from './Cards.controller';
 import Card from './Card';
 import './Cards.scss';
 
 const Cards = ({
   mismatchDelay,
-  cardSocketDatas,
-  emitTurnFinished,
-  emitCardClicked,
-  socket,
-  isCurrentTurn,
-  status,
-  emitCardsMatched,
+  cardsDatas,
+  onCardClick,
+  onCardsMatched,
+  onCardsMismatched,
+  cardsClickedIndexes,
+  resetCards,
+  onCardsWillCompare,
 }) => {
   const [cards, setCards] = useState([]); // Card components
-  const [blockMouse, setBlockMouse] = useState(false);
-  const [currentSelectedCards, setCurrentSelectedCards] = useState([]); // Cards currently selected by player
   const [previouslySelectedCards, setPreviouslySelectedCards] = useState([]); // All cards that matched already
   const [cardsJustGenerated, setCardsJustGenerated] = useState(true);
 
@@ -28,47 +26,38 @@ const Cards = ({
    * CARD CLICKED EVENT
    * * * * * * * * * */
   useEffect(() => {
-    socket.on('cardClicked', data => {
-      // Set the card to be clicked
-      console.log('ths card was clicked', data);
-      showCardInDeck(data);
-    });
-  }, []);
+    showCardsInDeck(cardsClickedIndexes);
+  }, [cardsClickedIndexes]);
 
   useEffect(() => {
-    if (status === 'Game Resetted') {
+    if (resetCards) {
       setCardsJustGenerated(true);
-      setCurrentSelectedCards([]);
       setPreviouslySelectedCards([]);
       setCards([]);
     }
-  }, [status]);
+  }, [resetCards]);
 
   useEffect(() => {
-    if (cardSocketDatas) generateCards();
-  }, [cardSocketDatas]);
+    if (cardsDatas) generateCards();
+  }, [cardsDatas]);
 
-  useEffect(() => {
-    if (!isCurrentTurn) {
-      setBlockMouse(true);
-    } else {
-      setBlockMouse(false);
-    }
-  }, [isCurrentTurn]);
+  const createCopyOfCardWithPreviousProps = (card, style, showCard) => {
+    return <Card {...card.props} key={card.props.id} style={style} showCard={showCard} />;
+  };
 
-  const showCardInDeck = index => {
-    setCurrentSelectedCards(oldArray => [...oldArray, index]);
+  const showCardsInDeck = cardIndexes => {
     const tempCards = cardsRef.current.slice();
-    const selectedCardComponent = tempCards[index];
-    const updatedCardComponent = (
-      <Card
-        {...selectedCardComponent.props}
-        key={selectedCardComponent.props.id}
-        style={{ pointerEvents: 'none', backgroundColor: 'pink' }}
-        showCard
-      />
-    );
-    tempCards[index] = updatedCardComponent;
+    const updatedCardComponentStyle = { pointerEvents: 'none', backgroundColor: 'pink' };
+    cardIndexes.forEach(cardIndex => {
+      const selectedCardComponent = tempCards[cardIndex];
+      const updatedCardComponent = createCopyOfCardWithPreviousProps(
+        selectedCardComponent,
+        updatedCardComponentStyle,
+        true,
+      );
+      tempCards[cardIndex] = updatedCardComponent;
+    });
+
     setCards(tempCards);
   };
 
@@ -94,12 +83,11 @@ const Cards = ({
 
     for (let i = 0; i < previouslySelectedCards.length; i++) {
       const cardComponent = tempCards[previouslySelectedCards[i]];
-      const updatedCardComponent = (
-        <Card
-          {...cardComponent.props}
-          key={cardComponent.props.id}
-          style={{ pointerEvents: 'none', backgroundColor: 'green' }}
-        />
+      const updatedCardStyle = { pointerEvents: 'none', backgroundColor: 'green' };
+      const updatedCardComponent = createCopyOfCardWithPreviousProps(
+        cardComponent,
+        updatedCardStyle,
+        true,
       );
 
       tempCards[previouslySelectedCards[i]] = updatedCardComponent;
@@ -109,28 +97,51 @@ const Cards = ({
     console.log('updated');
   }, [previouslySelectedCards]);
 
+  /* * * * * * * * * * * * *
+   * HANDLE MISMATCH CARDS  *
+   * * * * * * * * * * * * */
+  const handleMismatch = (cardIndex1, cardIndex2) => {
+    timeoutRef.current = null;
+
+    const tempCards = cards.slice();
+    tempCards[cardIndex1] = createCopyOfCardWithPreviousProps(cards[cardIndex1], {}, false);
+    tempCards[cardIndex2] = createCopyOfCardWithPreviousProps(cards[cardIndex2], {}, false);
+
+    setCards(tempCards);
+    //setCurrentSelectedCards([]);
+
+    onCardsMismatched();
+  };
+
+  /* * * * * * * * * * * *
+   * HANDLE MATCH CARDS  *
+   * * * * * * * * * * * * */
+  const handleMatch = (cardIndex1, cardIndex2) => {
+    console.log('Matched');
+    setPreviouslySelectedCards(oldArray => [...oldArray, cardIndex1, cardIndex2]);
+    // setCurrentSelectedCards([]);
+
+    onCardsMatched([cardIndex1, cardIndex2]);
+  };
+
+  /**
+   * Two cards selected
+   */
   useEffect(() => {
     // Player has selected two cards
-    if (currentSelectedCards && currentSelectedCards.length === 2) {
+    if (cardsClickedIndexes && cardsClickedIndexes.length === 2) {
       console.log('Applying game logic...');
 
-      setBlockMouse(true);
-      const cardIndex1 = cards[currentSelectedCards[0]].props.index;
-      const cardIndex2 = cards[currentSelectedCards[1]].props.index;
-      const cardNumber1 = cards[currentSelectedCards[0]].props.number;
-      const cardNumber2 = cards[currentSelectedCards[1]].props.number;
+      onCardsWillCompare();
+
+      const cardIndex1 = cards[cardsClickedIndexes[0]].props.index;
+      const cardIndex2 = cards[cardsClickedIndexes[1]].props.index;
+      const cardNumber1 = cards[cardsClickedIndexes[0]].props.number;
+      const cardNumber2 = cards[cardsClickedIndexes[1]].props.number;
 
       // Check if the two cards are the same number
       if (cardNumber1 === cardNumber2) {
-        console.log('Matched');
-        setPreviouslySelectedCards(oldArray => [...oldArray, cardIndex1, cardIndex2]);
-        setCurrentSelectedCards([]);
-        if (isCurrentTurn) {
-          // socket.emit('matchCardsUpdate', { cards: [cardIndex1, cardIndex2], username });
-          emitCardsMatched([cardIndex1, cardIndex2]);
-          //setBlockMouse(false);
-          emitTurnFinished();
-        }
+        handleMatch(cardIndex1, cardIndex2);
       } else {
         // Bad match, so "flip" them back
         // Wait 2 second so they can see the second card
@@ -139,80 +150,25 @@ const Cards = ({
         if (timeoutRef.current !== null) clearTimeout(timeoutRef.current);
 
         timeoutRef.current = setTimeout(() => {
-          timeoutRef.current = null;
-
-          const tempCards = cards.slice();
-
-          // Clear the previous pointerEvent: 'none' so cards are clickable again
-          tempCards[cardIndex1] = (
-            <Card
-              {...cards[cardIndex1].props}
-              key={cards[cardIndex1].props.id}
-              style={{}}
-              showCard={false}
-            />
-          );
-
-          tempCards[cardIndex2] = (
-            <Card
-              {...cards[cardIndex2].props}
-              key={cards[cardIndex2].props.id}
-              style={{}}
-              showCard={false}
-            />
-          );
-
-          setCards(tempCards);
-          setCurrentSelectedCards([]);
-          if (isCurrentTurn) {
-            //setBlockMouse(false);
-            emitTurnFinished();
-          }
+          handleMismatch(cardIndex1, cardIndex2);
         }, mismatchDelay);
       }
     }
-  }, [currentSelectedCards]);
+  }, [cardsClickedIndexes]);
 
   // Generate card components to store into card state
   const generateCards = () => {
-    console.log('generating cards');
-    console.log(cardSocketDatas);
-    const tempCards = generatePlayingCards(cardSocketDatas, onCardClick);
-    console.log(tempCards);
+    const tempCards = generatePlayingCards(cardsDatas, onCardClick);
     setCards(tempCards);
   };
 
-  const onCardClick = (index, number) => {
-    console.log('Index: ', index);
-    console.log('Number: ', number);
-    // move to server?
-    //setCurrentSelectedCards(oldArray => [...oldArray, index]);
-
-    emitCardClicked(index);
-
-    //   const tempCards = cardsRef.current.slice();
-    //   const selectedCardComponent = tempCards[index];
-    //   const updatedCardComponent = (
-    //     <Card
-    //       {...selectedCardComponent.props}
-    //       key={selectedCardComponent.props.id}
-    //       style={{ pointerEvents: 'none' }}
-    //       showCard
-    //     />
-    //   );
-    //   tempCards[index] = updatedCardComponent;
-    //   setCards(tempCards);
-  };
+  //const onCardClick = (index, number) => emitCardClicked(index);
 
   const renderCards = () => {
     return cards.map(card => card);
   };
 
-  return (
-    <div className="cards" style={blockMouse ? { pointerEvents: 'none' } : { pointerEvents: '' }}>
-      {renderCards()}
-    </div>
-  );
+  return <div className="cards">{renderCards()}</div>;
 };
 
 export default Cards;
