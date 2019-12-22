@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { generatePlayingCards } from './Cards.controller';
+import PropTypes from 'prop-types';
 import Card from './Card';
 import './Cards.scss';
 
@@ -169,6 +170,32 @@ const Cards = ({
   };
 
   return <div className="cards">{renderCards()}</div>;
+};
+
+Cards.propTypes = {
+  mismatchDelay: PropTypes.number,
+  cardsDatas: PropTypes.arrayOf(
+    PropTypes.shape({
+      number: PropTypes.number,
+    }),
+  ),
+  onCardClick: PropTypes.func,
+  onCardsMatched: PropTypes.func,
+  onCardsMismatched: PropTypes.func,
+  cardsClickedIndexes: PropTypes.arrayOf(PropTypes.number),
+  resetCards: PropTypes.bool,
+  onCardsWillCompare: PropTypes.func,
+};
+
+Cards.defaultProps = {
+  mismatchDelay: 1000,
+  cardsDatas: [],
+  onCardClick: () => {},
+  onCardsMatched: () => {},
+  onCardsMismatched: () => {},
+  cardsClickedIndexes: [],
+  resetCards: false,
+  onCardsWillCompare: () => {},
 };
 
 export default Cards;
