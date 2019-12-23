@@ -20,7 +20,7 @@ v10.16.3
 4) Navigate to the directory "memorygame"
 5) Run "npm i" to install dependencies
 6) Run "npm run start" to launch the website on http://localhost:3000
-7) Have two browsers navigate to http://localhost:3000 and type in a username
+7) Have two browsers navigate to http://localhost:3000 and type in a username (Do not login with more than two browsers!)
 8) Game!
 
 ## Aside
