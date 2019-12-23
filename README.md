@@ -8,8 +8,8 @@
 5) Run "npm i" to install dependencies
 6) Run "npm run start" to launch the website on http://localhost:3000
 
-## Suggested Playing Environment
-![Game Area](https://imgur.com/OiGySBm)
+## Suggested Window Playing Environment
+![Game Area](https://imgur.com/OiGySBm.jpg)
 
 ## Run tests
 1) Navigate to the directory "memorygame"
