@@ -24,6 +24,7 @@
 * Reset
 * Leaderboards/Best score (stored in memory on server)
 * Win/Lose/Tied message
+* Randomized Layout
 
 ## Aside
 * The number of cards displayed is the number of cards multiplied by 2 (so there's a match for every card)
