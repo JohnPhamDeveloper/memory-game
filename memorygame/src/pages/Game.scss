@@ -29,6 +29,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    height: 70vh;
+    align-self: center;
   }
 
   & .reset-game-button {
@@ -39,15 +41,15 @@
   & .leaderboard-button {
     pointer-events: all;
   }
-}
-
-.history {
-  height: 70vh;
-  align-self: center;
 
   & .game-state {
     color: white;
     font-size: 12px;
+  }
+
+  & .time-text {
+    color: white;
+    margin-top: 4px;
   }
 
   & .number-of-cards-field,

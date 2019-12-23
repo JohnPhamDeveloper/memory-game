@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import moment from 'moment';
+import useTimer from '../components/useTimer';
 import socketIOClient from 'socket.io-client';
 import './Game.scss';
 import Cards from '../components/Cards';
@@ -21,6 +23,7 @@ const Game = ({ username }) => {
   const [showFinishScreen, setShowFinishScreen] = useState(false);
   const [cardsClickedIndexes, setCardsClickedIndexes] = useState([]);
   const [blockMouse, setBlockMouse] = useState(false);
+  const [timeText] = useTimer();
 
   useEffect(() => {
     socket.emit('playersUpdate', username);
@@ -229,6 +232,9 @@ const Game = ({ username }) => {
         {/* Game status display */}
         <div className="game-state">{`Status: ${gameState.status}`}</div>
 
+        {/* Timer display */}
+        <p className="time-text">{timeText}</p>
+
         {/* Reset Button */}
         <input
           className="reset-game-button"
@@ -247,6 +253,7 @@ const Game = ({ username }) => {
           onClick={onLeaderboardSubmit}
         />
       </div>
+
       <Leaderboard
         show={showLeaderboard}
         onClose={onLeaderboardClose}
