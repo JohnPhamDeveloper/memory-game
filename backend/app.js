@@ -7,6 +7,7 @@ express.use(cors());
 
 let gameStarted = false;
 let numberOfCards = 0;
+const leaderboard = {};
 //let mismatchDelay = 1000;
 let cardsData = [];
 let playerDatas = []; // Only username, turn order
@@ -57,11 +58,18 @@ socketio.on('connection', socket => {
       score: (playerDataObjects[data.username].score += matchPointIncrement),
     };
 
+    // Change user leaderboard score if their current score is higher
+    if (
+      leaderboard[data.username].score < playerDataObjects[data.username].score
+    ) {
+      leaderboard[data.username].score = playerDataObjects[data.username].score;
+    }
+
     // Update leaderboard
-    const arrayLeaderboard = Object.keys(playerDataObjects).map(key => {
+    const arrayLeaderboard = Object.keys(leaderboard).map(key => {
       return {
         username: key,
-        score: playerDataObjects[key].score,
+        score: leaderboard[key].score,
       };
     });
 
@@ -76,6 +84,13 @@ socketio.on('connection', socket => {
    * ADD PLAYER TO GAME  *
    * * * * * * * * * * * */
   socket.on('playersUpdate', username => {
+    // New user to leaderboard
+    if (!leaderboard[username]) {
+      leaderboard[username] = {
+        score: 0,
+      };
+    }
+
     // Max two players only
     if (username && playerDatas.length < 2) {
       // leaderboard[username] = {
