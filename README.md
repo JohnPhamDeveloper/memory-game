@@ -26,7 +26,7 @@ v10.16.3
 ## Aside
 * **Don't set the cards while the game is ongoing**; instead, hit the reset game buton, then set the cards.
 * The number of cards displayed is the number of cards multiplied by 2 (so there's a match for every card)
-* Must restart the "How to run" steps if someone disconnects or refresh
+* Must restart server and have both browser login again if someone disconnects or refresh
 * 2 weeks to do and christmas is coming, so I cannot write every tests and refactor! Tests are focused on cards game components.
 * Whoever owns the turn gets to set the card number.
 
