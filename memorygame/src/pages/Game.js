@@ -77,6 +77,7 @@ const Game = ({ username }) => {
         cardsClickedIndexes={cardsClickedIndexes}
         mismatchDelay={mismatchDelaySubmit}
         cardsDatas={cardSocketDatas}
+        onCardsDidCompare={onCardsDidCompare}
       />
     );
   };
@@ -91,7 +92,7 @@ const Game = ({ username }) => {
   const onLeaderboardClose = () => setShowLeaderboard(false);
   const emitTurnFinished = () => socket.emit('turnFinished', username);
   const emitCardClicked = index => socket.emit('cardClicked', index);
-  const emitCardsMatched = cards => socket.emit('matchCardsUpdate', { cards, username });
+  const emitCardsMatched = cards => socket.emit('matchCardsUpdate', cards);
   const onCardClick = index => emitCardClicked(index);
   const isCurrentTurn = () => gameState.currentPlayerTurnName === username;
 
@@ -102,18 +103,29 @@ const Game = ({ username }) => {
   };
 
   const onCardsMatched = cards => {
+    // if (isCurrentTurn()) {
+    //   emitCardsMatched(cards);
+    //  // emitTurnFinished();
+    //   setBlockMouse(false);
+    //   setCardsClickedIndexes([]);
+    // }
+  };
+
+  const onCardsDidCompare = cardsMatched => {
     if (isCurrentTurn()) {
-      emitCardsMatched(cards);
+      emitCardsMatched({ username, cards: cardsMatched });
       emitTurnFinished();
       setBlockMouse(false);
+      setCardsClickedIndexes([]);
     }
   };
 
   const onCardsMismatched = () => {
-    if (isCurrentTurn()) {
-      emitTurnFinished();
-      setBlockMouse(false);
-    }
+    // if (isCurrentTurn()) {
+    //   //emitTurnFinished();
+    //   setBlockMouse(false);
+    //   setCardsClickedIndexes([]);
+    // }
   };
 
   const hasThisPlayerWon = () =>

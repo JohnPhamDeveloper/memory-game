@@ -26,7 +26,7 @@ socketio.on('connection', socket => {
    * CARD NUMBER SUBMISSION
    */
   socket.on('cardUpdate', data => {
-    reset();
+    //reset();
     console.log('Updating cards: ', data);
     numberOfCards = data;
 
@@ -46,6 +46,9 @@ socketio.on('connection', socket => {
    * }
    * * * * * * * * */
   socket.on('matchCardsUpdate', data => {
+    if (data.cards.length <= 0) return;
+
+    console.log(data);
     // Add matched cards to count towards ending the game
     matchedCardIndexes.push(...data.cards);
 
@@ -54,6 +57,7 @@ socketio.on('connection', socket => {
       score: (playerDataObjects[data.username].score += matchPointIncrement),
     };
 
+    // Update leaderboard
     const arrayLeaderboard = Object.keys(playerDataObjects).map(key => {
       return {
         username: key,
@@ -61,8 +65,9 @@ socketio.on('connection', socket => {
       };
     });
 
-    console.log(arrayLeaderboard);
+    //console.log(arrayLeaderboard);
 
+    // Sort from highest score to lowest
     arrayLeaderboard.sort((a, b) => (a.score < b.score ? 1 : -1));
     socketio.emit('leaderboardUpdate', arrayLeaderboard);
   });
