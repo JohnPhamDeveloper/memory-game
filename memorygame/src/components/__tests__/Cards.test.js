@@ -60,7 +60,7 @@ test('no cards have styles if there are no cards clicked', async () => {
   });
 });
 
-it('calls onCardsMatch if the two cards match', () => {
+it('calls onCardsMatch if the two cards match', async () => {
   const onMatch = jest.fn();
   const { getByTestId } = render(
     <Cards {...props} cardsClickedIndexes={matchedCardsClickedIndexes} onCardsMatched={onMatch} />,
@@ -75,11 +75,16 @@ it('calls onCardsMatch if the two cards match', () => {
   fireEvent.click(card1);
   fireEvent.click(card2);
 
-  expect(onMatch).toHaveBeenCalledTimes(1);
-  expect(onMatch).toHaveBeenCalledWith([
-    matchedCardsClickedIndexes[0],
-    matchedCardsClickedIndexes[1],
-  ]);
+  await wait(
+    () => {
+      expect(onMatch).toHaveBeenCalledTimes(1);
+      expect(onMatch).toHaveBeenCalledWith([
+        matchedCardsClickedIndexes[0],
+        matchedCardsClickedIndexes[1],
+      ]);
+    },
+    { timeout: props.mismatchDelay + 300 },
+  );
 });
 
 it('shows no cards when the game resets', () => {

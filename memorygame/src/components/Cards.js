@@ -98,13 +98,38 @@ const Cards = ({
       // console.log(unmatchedIndexes);
       // console.log('...');
 
-      handleMatch(matchedindexes);
+      // Use delay for both
+      if (
+        matchedindexes &&
+        matchedindexes.length > 0 &&
+        unmatchedIndexes &&
+        unmatchedIndexes.length > 0
+      ) {
+        console.log('time out version 1');
+        timeoutRef.current = setTimeout(() => {
+          handleMatch(matchedindexes);
+          handleMismatch(unmatchedIndexes);
+          onCardsDidCompare(matchedindexes);
+        }, mismatchDelay);
+      } else if (unmatchedIndexes && unmatchedIndexes.length > 0) {
+        console.log('time out version 2');
+        timeoutRef.current = setTimeout(() => {
+          handleMatch(matchedindexes);
+          handleMismatch(unmatchedIndexes);
+          onCardsDidCompare(matchedindexes);
+        }, mismatchDelay);
+      } else {
+        console.log('time out version 3');
+        handleMatch(matchedindexes);
+        handleMismatch(unmatchedIndexes);
+        onCardsDidCompare(matchedindexes);
+      }
 
       // Bad match, so "flip" them back
       // Wait 2 second so they can see the second card
       //timeoutRef.current = setTimeout(() => {
-      handleMismatch(unmatchedIndexes);
-      onCardsDidCompare(matchedindexes);
+
+      // onCardsDidCompare(matchedindexes);
       //}, mismatchDelay);
     }
   }, [currentlySelectedCardsIndexes]);
@@ -185,7 +210,8 @@ const Cards = ({
     console.log('unmatch');
     timeoutRef.current = null;
 
-    timeoutRef.current = setTimeout(() => {}, mismatchDelay);
+    // Tell server to wait a bit before sending down the new game state... which will cause the re-render
+
     const tempCards = cards.slice();
     cardIndexes.forEach(index => {
       tempCards[index] = createCopyOfCardWithPreviousProps(cards[index], {}, false);
