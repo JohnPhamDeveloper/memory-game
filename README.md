@@ -11,13 +11,18 @@ v10.16.3
 5) Run "npm i" to install dependencies
 6) Run "npm run start" to launch the website on http://localhost:3000
 
+## Aside
+* The number of cards displayed is the number of cards multiplied by 2 (so there's a match for every card)
+* Must restart the "How to run" steps if someone disconnects or refresh
+* 2 weeks to do and christmas is coming, so I cannot write every tests! Tests are focused on cards game components.
+
 ## Suggested Window Playing Environment
 ![Game Area](https://imgur.com/OiGySBm.jpg)
 
 ## Run tests
 1) Navigate to the directory "memorygame"
-2) Run "npm run test"
-3) Run "npm run test -- --coverage" for coverage on the cards game
+2) Run "npm run test --watchAll=fals"
+3) Run "npm run test -- --coverage --watchAll=false" for test coverage on the cards game
 
 ## Features
 * Multiplayer
@@ -29,7 +34,4 @@ v10.16.3
 * Win/Lose/Tied message
 * Randomized Layout
 
-## Aside
-* The number of cards displayed is the number of cards multiplied by 2 (so there's a match for every card)
-* Must restart the "How to run" steps if someone disconnects or refresh
-* 2 weeks to do and christmas is coming, so I cannot write every tests!
+
