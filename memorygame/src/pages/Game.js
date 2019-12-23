@@ -174,7 +174,10 @@ const Game = ({ username }) => {
           }`}
           username={username}
           score={
-            gameState && gameState.playerDataObjects && gameState.playerDataObjects[username].score
+            gameState &&
+            gameState.playerDataObjects &&
+            gameState.playerDataObjects[username] &&
+            gameState.playerDataObjects[username].score
           }
         />
 

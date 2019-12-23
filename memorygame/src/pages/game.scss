@@ -14,10 +14,17 @@
   display: grid;
   grid-template-columns: 1fr 200px;
   grid-template-rows: 100vh;
-  overflow: scroll;
+  //overflow: scroll;
 
-  background: rgb(97, 106, 201);
-  background: radial-gradient(circle, rgba(97, 106, 201, 1) 0%, rgba(74, 83, 179, 1) 71%);
+  &::before {
+    content: '';
+    z-index: -1;
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    background: rgb(97, 106, 201);
+    background: radial-gradient(circle, rgba(97, 106, 201, 1) 0%, rgba(74, 83, 179, 1) 71%);
+  }
 
   & .history {
     color: #858dd7;
