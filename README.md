@@ -29,7 +29,6 @@ v10.16.3
 * 2 weeks to do and christmas is coming, so I cannot write every tests and refactor! Tests are focused on cards game components.
 * Resetting the game will wipe the leaderboard
 * Don't set the cards while the game is ongoing; instead, reset the game, then set the cards.
-* Leaderboard resets when game resets
 
 ## Suggested Window Playing Environment
 ![Game Area](https://imgur.com/OiGySBm.jpg)
