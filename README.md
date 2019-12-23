@@ -1,5 +1,8 @@
 # Memory Game
 
+## Node version
+v10.16.3
+
 ## How to run
 1) Navigate to the directory "backend" with your terminal
 2) Run "npm i" to install dependencies
