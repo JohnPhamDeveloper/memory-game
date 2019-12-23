@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import moment from 'moment';
 import useTimer from '../components/useTimer';
 import socketIOClient from 'socket.io-client';
-import './Game.scss';
+import './game.scss';
 import Cards from '../components/Cards';
 import User from '../components/User';
 import Leaderboard from '../components/Leaderboard';

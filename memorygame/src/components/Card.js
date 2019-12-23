@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import './Card.scss';
+import './card.scss';
 
 /* * * *
  * NOTE: For react-testing-library, we use ...props since 'data-testid' is not a valid way to write a variable"

@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import Modal from './Modal';
-import './Leaderboard.scss';
+import './leaderboard.scss';
 
 const Leaderboard = ({ show, onClose, leaderboardData }) => {
   const renderUserDatas = () => {

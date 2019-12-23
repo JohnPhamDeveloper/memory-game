@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { generatePlayingCards } from './Cards.controller';
 import Card from './Card';
-import './Cards.scss';
+import './cards.scss';
 
 const Cards = ({
   mismatchDelay,

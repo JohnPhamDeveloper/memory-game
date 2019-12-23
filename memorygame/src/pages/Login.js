@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Redirect } from 'react-router-dom';
 import InputButton from '../components/InputButton';
 import InputText from '../components/InputText';
-import './Login.scss';
+import './login.scss';
 
 const Login = ({ setUsername }) => {
   const [usernameField, setUsernameField] = useState('');

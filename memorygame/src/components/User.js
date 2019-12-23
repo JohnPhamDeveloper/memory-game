@@ -1,5 +1,5 @@
 import React from 'react';
-import './User.scss';
+import './user.scss';
 
 const User = ({ className, username, score }) => {
   return (
