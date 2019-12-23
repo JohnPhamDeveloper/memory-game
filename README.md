@@ -3,6 +3,16 @@
 ## Node version
 v10.16.3
 
+## Features
+* Multiplayer
+* Time tracker
+* Adjustable cards
+* Turn order (border box around whoever turn belongs to)
+* Reset
+* Leaderboards/Best score (stored in memory on server)
+* Win/Lose/Tied message
+* Randomized Layout
+
 ## How to run
 1) Navigate to the directory "backend" with your terminal
 2) Run "npm i" to install dependencies
@@ -14,24 +24,16 @@ v10.16.3
 ## Aside
 * The number of cards displayed is the number of cards multiplied by 2 (so there's a match for every card)
 * Must restart the "How to run" steps if someone disconnects or refresh
-* 2 weeks to do and christmas is coming, so I cannot write every tests! Tests are focused on cards game components.
+* 2 weeks to do and christmas is coming, so I cannot write every tests and refactor! Tests are focused on cards game components.
 
 ## Suggested Window Playing Environment
 ![Game Area](https://imgur.com/OiGySBm.jpg)
 
 ## Run tests
 1) Navigate to the directory "memorygame"
-2) Run "npm run test --watchAll=fals"
+2) Run "npm run test" then hit the "a" key.
 3) Run "npm run test -- --coverage --watchAll=false" for test coverage on the cards game
 
-## Features
-* Multiplayer
-* Time tracker
-* Adjustable cards
-* Turn order (border box around whoever turn belongs to)
-* Reset
-* Leaderboards/Best score (stored in memory on server)
-* Win/Lose/Tied message
-* Randomized Layout
+
 
 
